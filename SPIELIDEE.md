@@ -80,8 +80,9 @@ Eine neue Claude-Sitzung soll es lesen und auf dieser Basis das Spiel bauen.
 
 ## Computer-Pool (offener Punkt)
 
-Die offizielle Liste aller Panini-Sticker steht auf https://scanini.app/albums/world-cup-2026 (Unterseiten je Team).
-In der Cloud-Sitzung war die Seite durch die Netzwerk-Einstellung blockiert → **in der neuen Sitzung von dort laden**.
+**Erledigt:** Die Liste aller 864 Spieler-Sticker wurde von https://scanini.app/albums/world-cup-2026 geladen.
+Alle 121 Karten des Spielsets sind darin gefunden; die übrigen 743 bilden den Computer-Pool (`daten/computer-pool.js`).
+Positionen nach Panini-Reihenfolge korrigiert: Ibrahim Sabra und Elijah Just = Sturm, Saleh Abu Alshamat = Mittelfeld.
 Album: 48 Teams × 20 Sticker (Wappen, Teamfoto, 18 Spieler) + 20 Sonder-Sticker = 980.
 
 48 Teams: USA, MEX, CAN · JPN, IRN, UZB, KOR, JOR, AUS, QAT, KSA, IRQ · MAR, TUN, EGY, ALG, GHA, CPV, RSA, SEN, CIV, COD ·
@@ -226,7 +227,13 @@ Al Sadd (Al-Haydos, Saïss, Salman) · Augsburg (Gregoritsch, Jakić) · Burnley
 Aston Villa (E. Martínez, Digne) · AC Milan (Leão, Maignan) · Galatasaray (Çakır, Ayhan) · Al-Karma (Abu Hashish, Saadeh) ·
 Al-Ahli Saudi (Mahrez, Abu Alshamat) · Çaykur Rizespor (Fofana, Aliqulov).
 
-## Nächste Schritte für die neue Sitzung
+## Offene Punkte
+
+- Verein von Ángel Romero (PAR 19) auf der Karte nachsehen und in `daten/spielset.js` eintragen.
+- Geburtsjahr von Ibrahim Sabra prüfen.
+- Mannschaftssticker (Wappen) einbauen, sobald die Fotos da sind.
+
+## Ursprünglich geplante Schritte (erledigt)
 
 1. Panini-Checkliste von scanini.app laden → Computer-Pool (alle Sticker außer dem Spielset).
 2. Spielerdaten recherchieren und ergänzen (Stärken, Schwächen, Länderspiele, internationale Erfahrung).

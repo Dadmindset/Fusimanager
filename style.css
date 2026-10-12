@@ -1,0 +1,360 @@
+/* =====================================================================
+   AUSSEHEN – Farben, Schriften, Abstände
+   =====================================================================
+   Layout-Idee: ein Stadionheft – Anzeigetafel oben, darunter Panini-Karten
+   im Raster. Alle Farben sind "Variablen" (--name) und stehen ganz oben.
+   Hell- und Dunkelmodus haben je eigene Werte.
+   ===================================================================== */
+
+:root {
+  --rasen: #0e5a3a;        /* Hauptfarbe: Rasengrün */
+  --rasen-hell: #e3f1e8;
+  --sticker: #8fd0cf;      /* Türkis der Panini-Sticker */
+  --flutlicht: #ffd23f;    /* Gelb für Highlights */
+  --rot: #d7263d;
+  --tinte: #14213d;        /* Textfarbe */
+  --papier: #f6f8f4;       /* Hintergrund */
+  --flaeche: #ffffff;      /* Kästen */
+  --leise: #5b6b63;        /* leiser Text */
+  --linie: #cfdcd4;
+
+  /* Positionsfarben wie auf den Panini-Stickern */
+  --pos-tw: #6b3fa0;
+  --pos-ab: #d93d73;
+  --pos-mf: #ea7424;
+  --pos-st: #1f4e79;
+
+  --schrift-gross: "Anton", "Impact", "Arial Narrow", sans-serif;
+  --schrift: "Nunito", "Trebuchet MS", system-ui, sans-serif;
+
+  --rund: 12px;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --rasen: #3fb67a;
+    --rasen-hell: #16342a;
+    --sticker: #2f6f72;
+    --flutlicht: #ffd23f;
+    --rot: #ff5a6e;
+    --tinte: #eef3ef;
+    --papier: #0d1a16;
+    --flaeche: #15261f;
+    --leise: #9db3a8;
+    --linie: #2a4237;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --rasen: #3fb67a;
+  --rasen-hell: #16342a;
+  --sticker: #2f6f72;
+  --flutlicht: #ffd23f;
+  --rot: #ff5a6e;
+  --tinte: #eef3ef;
+  --papier: #0d1a16;
+  --flaeche: #15261f;
+  --leise: #9db3a8;
+  --linie: #2a4237;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--papier);
+  color: var(--tinte);
+  font-family: var(--schrift);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+h1, h2, h3 {
+  font-family: var(--schrift-gross);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-wrap: balance;
+  margin: 0;
+}
+h1 { font-size: clamp(2.6rem, 9vw, 4.5rem); line-height: 1; }
+h2 { font-size: clamp(1.7rem, 5vw, 2.3rem); line-height: 1.1; }
+h3 { font-size: 1.3rem; }
+p { margin: 0; }
+
+/* ---------- Kopfzeile ---------- */
+.kopf {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: var(--rasen);
+  color: #fff;
+}
+.logo-knopf {
+  display: flex; align-items: center; gap: 8px;
+  background: none; border: 0; color: inherit; cursor: pointer;
+  font-family: var(--schrift-gross); font-size: 1.3rem; letter-spacing: 0.03em;
+}
+.logo-klein { width: 34px; height: 34px; background: #fff; border-radius: 50%; padding: 3px; }
+.kopf-info { margin-left: auto; font-weight: 800; font-variant-numeric: tabular-nums; }
+.icon-knopf { background: none; border: 0; font-size: 1.4rem; cursor: pointer; }
+
+/* ---------- Seitenrahmen ---------- */
+.inhalt { max-width: 1100px; margin: 0 auto; padding: 24px 16px 64px; }
+.seite { display: flex; flex-direction: column; gap: 16px; }
+.mitte { text-align: center; align-items: center; }
+.leise { color: var(--leise); font-size: 0.92rem; }
+.gross { font-size: 4rem; line-height: 1; }
+.name { color: var(--rasen); }
+.datum { font-weight: 800; font-size: 1.1rem; }
+
+.kasten {
+  background: var(--flaeche);
+  border: 1px solid var(--linie);
+  border-radius: var(--rund);
+  padding: 16px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.kasten.warnung { border-color: var(--rot); }
+.kasten ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+
+.meldung {
+  background: var(--flutlicht);
+  color: #14213d;
+  padding: 10px 14px;
+  border-radius: var(--rund);
+  font-weight: 700;
+}
+
+/* ---------- Knöpfe ---------- */
+.knopfreihe { display: flex; flex-wrap: wrap; gap: 10px; }
+.mitte .knopfreihe { justify-content: center; }
+.knopf {
+  font: inherit; font-weight: 800;
+  padding: 12px 18px;
+  border-radius: 999px;
+  border: 2px solid var(--rasen);
+  background: var(--flaeche);
+  color: var(--tinte);
+  cursor: pointer;
+}
+.knopf.haupt { background: var(--rasen); color: #fff; }
+.knopf.aktiv { background: var(--flutlicht); border-color: var(--flutlicht); color: #14213d; }
+.knopf:disabled { opacity: 0.4; cursor: not-allowed; }
+.knopf:focus-visible, .karte:focus-visible, .chip:focus-visible, .vorschlag:focus-visible {
+  outline: 3px solid var(--flutlicht); outline-offset: 2px;
+}
+
+/* ---------- Startseite ---------- */
+.start { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 18px; padding-block: 24px; }
+.logo-gross { width: min(240px, 60vw); }
+.untertitel { font-size: 1.15rem; max-width: 30ch; }
+.start h1 { color: var(--rasen); }
+
+.namen { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.namensfeld, #suche, .einstellung input {
+  font: inherit; padding: 12px 14px;
+  border: 2px solid var(--linie); border-radius: var(--rund);
+  background: var(--flaeche); color: var(--tinte); width: 100%;
+}
+.namensfeld:focus, #suche:focus, .einstellung input:focus { border-color: var(--rasen); outline: none; }
+
+/* ---------- Suche mit Vorschlägen ---------- */
+.suche { display: flex; flex-direction: column; gap: 6px; max-width: 560px; }
+.vorschlaege { display: flex; flex-direction: column; gap: 6px; }
+.vorschlag {
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px;
+  text-align: left; font: inherit; color: var(--tinte);
+  padding: 8px 12px; border-radius: var(--rund);
+  border: 1px solid var(--linie); background: var(--flaeche); cursor: pointer;
+}
+.vorschlag:hover { border-color: var(--rasen); }
+.vorschlag em { color: var(--rot); font-style: normal; font-weight: 700; }
+.vorschlag-flagge { font-size: 1.6rem; }
+
+/* ---------- Panini-Karten ---------- */
+.karten { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+.karte {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 26px 8px 10px;
+  border-radius: var(--rund);
+  border: 3px solid transparent;
+  background: var(--sticker);
+  color: #14213d;
+  font: inherit; text-align: center;
+  cursor: pointer;
+  transition: transform 0.12s ease;
+}
+div.karte { cursor: default; }
+.karte:hover { transform: translateY(-2px); }
+.karte.gewaehlt { border-color: var(--flutlicht); box-shadow: 0 0 0 3px var(--rasen); }
+.karte.verletzt { opacity: 0.45; }
+.karte-code { position: absolute; top: 6px; left: 8px; font-size: 0.72rem; font-weight: 800; opacity: 0.7; }
+.karte-c {
+  position: absolute; top: 4px; right: 6px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--flutlicht); color: #14213d; font-weight: 900; font-size: 0.8rem;
+  display: grid; place-items: center;
+}
+.karte-verletzt { position: absolute; top: 4px; right: 30px; }
+.karte-bild {
+  position: relative;
+  width: 64px; height: 64px; border-radius: 50%;
+  background: var(--nation);
+  display: grid; place-items: center;
+  border: 3px solid #fff;
+}
+.karte-bild b { font-family: var(--schrift-gross); font-weight: 400; font-size: 1.5rem; color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6); }
+.karte-flagge { position: absolute; bottom: -6px; right: -10px; font-size: 1.4rem; }
+.karte-name {
+  width: 100%;
+  margin-top: 6px;
+  padding: 3px 6px;
+  border-radius: 6px;
+  color: #fff;
+  font-weight: 900; font-size: 0.86rem; line-height: 1.2;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+.pos-TW .karte-name, .pos-mini.pos-TW { background: var(--pos-tw); }
+.pos-AB .karte-name, .pos-mini.pos-AB { background: var(--pos-ab); }
+.pos-MF .karte-name, .pos-mini.pos-MF { background: var(--pos-mf); }
+.pos-ST .karte-name, .pos-mini.pos-ST { background: var(--pos-st); }
+.karte-verein { font-size: 0.74rem; font-weight: 700; line-height: 1.2; min-height: 1.8em; }
+.karte-fuss { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 800; }
+.karte-hinweise { font-size: 0.72rem; font-weight: 700; line-height: 1.3; background: rgba(255, 255, 255, 0.7); border-radius: 6px; padding: 2px 6px; }
+.karte.klein { padding-top: 20px; }
+.karte.klein .karte-bild { width: 44px; height: 44px; }
+.karte.klein .karte-bild b { font-size: 1.05rem; }
+.karte.klein .karte-flagge { font-size: 1.1rem; }
+
+.sterne { color: #b07b00; letter-spacing: -1px; }
+.sterne .leer { color: rgba(20, 33, 61, 0.2); }
+.vorschlag .sterne .leer { color: var(--linie); }
+
+.ampel { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(0, 0, 0, 0.3); }
+.ampel.gruen { background: #2bb24c; }
+.ampel.gelb { background: #ffc400; }
+.ampel.rot { background: #e5383b; }
+
+/* ---------- Aufstellung ---------- */
+.zaehler { font-size: 1.15rem; }
+.aufstellung-leiste { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  font: inherit; font-weight: 700; font-size: 0.9rem;
+  padding: 6px 12px; border-radius: 999px;
+  border: 2px solid var(--linie); background: var(--flaeche); color: var(--tinte); cursor: pointer;
+}
+.chip.kapitaen { background: var(--flutlicht); border-color: var(--flutlicht); color: #14213d; }
+.teamgeist { font-weight: 800; color: var(--rasen); }
+.teamgeist.klein { font-size: 0.8rem; }
+
+.spielfeld {
+  display: flex; flex-direction: column; gap: 12px;
+  padding: 16px;
+  border-radius: var(--rund);
+  background: repeating-linear-gradient(0deg, #1f7a4c 0 40px, #23864f 40px 80px);
+}
+.spielfeld .reihe { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.spielfeld .karte { width: 120px; }
+
+/* ---------- Vorschau ---------- */
+.partie-vorschau {
+  background: var(--flaeche); border: 1px solid var(--linie); border-radius: var(--rund);
+  padding: 14px 16px; display: flex; flex-direction: column; gap: 6px;
+}
+.paarung { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; font-weight: 900; font-size: 1.2rem; }
+.vs { color: var(--leise); font-weight: 700; font-size: 0.9rem; }
+.ort { color: var(--leise); }
+
+/* ---------- Live-Ticker ---------- */
+.anzeigetafel {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center; gap: 12px;
+  padding: 18px 16px;
+  border-radius: var(--rund);
+  background: #10202a;
+  color: #fff;
+  text-align: center;
+}
+.tafel-team { font-weight: 900; font-size: clamp(0.95rem, 3vw, 1.3rem); min-width: 0; overflow-wrap: anywhere; }
+.tafel-stand { font-family: var(--schrift-gross); font-size: clamp(2.6rem, 10vw, 4rem); color: var(--flutlicht); font-variant-numeric: tabular-nums; }
+.tafel-minute { grid-column: 1 / -1; color: #9fd8b5; font-weight: 800; }
+
+.aufstellungen { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.aufstellungen > div { min-width: 0; }
+.liste-aufstellung { list-style: none; margin: 0; padding: 0; font-size: 0.85rem; display: flex; flex-direction: column; gap: 3px; }
+.pos-mini { display: inline-block; min-width: 2.2em; text-align: center; color: #fff; border-radius: 4px; font-size: 0.7rem; font-weight: 900; }
+
+.ticker { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.ereignis {
+  display: grid; grid-template-columns: 3em 1fr; gap: 8px;
+  padding: 10px 12px; border-radius: var(--rund);
+  background: var(--flaeche); border: 1px solid var(--linie);
+}
+.ereignis .minute { font-weight: 900; color: var(--leise); font-variant-numeric: tabular-nums; }
+.ereignis.tor { background: var(--flutlicht); color: #14213d; border-color: var(--flutlicht); font-weight: 800; font-size: 1.05rem; animation: tor 0.6s ease; }
+.ereignis.tor .minute { color: #14213d; }
+.ereignis.verletzung { border-color: var(--rot); }
+.ereignis.gelb { border-left: 6px solid #ffc400; }
+.tor-bilder { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.tor-bilder img { width: 150px; max-width: 45%; border-radius: 8px; background: #fff; }
+@keyframes tor { 0% { transform: scale(0.9); } 50% { transform: scale(1.04); } 100% { transform: scale(1); } }
+
+/* ---------- Auswertung ---------- */
+.ergebnisse { display: flex; flex-direction: column; gap: 8px; }
+.ergebnis {
+  display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center;
+  padding: 12px 14px; border-radius: var(--rund);
+  background: var(--flaeche); border: 1px solid var(--linie);
+}
+.ergebnis span:first-child { text-align: right; }
+.ergebnis b { font-family: var(--schrift-gross); font-weight: 400; font-size: 1.6rem; font-variant-numeric: tabular-nums; }
+.ergebnis .voll { grid-column: 1 / -1; color: var(--leise); text-align: center; }
+.persoenlich.sieg { border: 2px solid var(--rasen); background: var(--rasen-hell); }
+.persoenlich.niederlage { border: 2px solid var(--rot); }
+
+.zwei-spalten { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+.zwei-spalten > div { min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.tabelle-rahmen { overflow-x: auto; }
+.tabelle { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 0.95rem; }
+.tabelle th, .tabelle td { padding: 7px 8px; text-align: left; border-bottom: 1px solid var(--linie); white-space: nowrap; }
+.tabelle .team-spalte { white-space: normal; }
+.tabelle th { font-size: 0.8rem; color: var(--leise); text-transform: uppercase; letter-spacing: 0.04em; }
+.tabelle tr.mensch td { font-weight: 800; background: var(--rasen-hell); }
+.hoch { color: #2bb24c; }
+.runter { color: var(--rot); }
+.gleich { color: var(--leise); font-size: 0.7rem; }
+
+/* ---------- Pokal ---------- */
+.pokal-seite { position: relative; overflow: hidden; }
+.pokal-bild { width: min(220px, 55vw); animation: heben 1.4s ease-out; }
+.gross-text { font-size: 1.4rem; font-weight: 900; }
+@keyframes heben { from { transform: translateY(40px) scale(0.8); opacity: 0.3; } to { transform: none; opacity: 1; } }
+.konfetti { position: absolute; inset: 0; pointer-events: none; }
+.konfetti span {
+  position: absolute; top: -40px; left: calc(var(--i) * 15% + 4%);
+  font-size: 2rem; animation: fallen 3.5s linear calc(var(--i) * 0.4s) infinite;
+}
+@keyframes fallen { to { transform: translateY(110vh) rotate(360deg); } }
+
+/* ---------- Einstellungen ---------- */
+.einstellungen { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.einstellung { display: flex; flex-direction: column; gap: 4px; font-weight: 700; font-size: 0.92rem; }
+
+@media (max-width: 480px) {
+  .karten { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .aufstellungen { grid-template-columns: 1fr; }
+  .spielfeld .karte { width: 100px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

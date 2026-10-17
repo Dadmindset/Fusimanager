@@ -1,7 +1,7 @@
 /* =====================================================================
    AUSSEHEN – Farben, Schriften, Abstände
    =====================================================================
-   Layout-Idee: ein Stadionheft – Anzeigetafel oben, darunter Panini-Karten
+   Layout-Idee: ein Stadionheft – Anzeigetafel oben, darunter Sammelkarten
    im Raster. Alle Farben sind "Variablen" (--name) und stehen ganz oben.
    Hell- und Dunkelmodus haben je eigene Werte.
    ===================================================================== */
@@ -9,7 +9,7 @@
 :root {
   --rasen: #0e5a3a;        /* Hauptfarbe: Rasengrün */
   --rasen-hell: #e3f1e8;
-  --sticker: #8fd0cf;      /* Türkis der Panini-Sticker */
+  --sticker: #8fd0cf;      /* Türkis der Sammelsticker */
   --flutlicht: #ffd23f;    /* Gelb für Highlights */
   --rot: #d7263d;
   --tinte: #14213d;        /* Textfarbe */
@@ -18,7 +18,7 @@
   --leise: #5b6b63;        /* leiser Text */
   --linie: #cfdcd4;
 
-  /* Positionsfarben wie auf den Panini-Stickern */
+  /* Positionsfarben wie auf den Stickern */
   --pos-tw: #6b3fa0;
   --pos-ab: #d93d73;
   --pos-mf: #ea7424;
@@ -191,7 +191,7 @@ p { margin: 0; }
 .vorschlag em { color: var(--rot); font-style: normal; font-weight: 700; }
 .vorschlag-flagge { font-size: 1.6rem; }
 
-/* ---------- Panini-Karten ---------- */
+/* ---------- Sammelkarten ---------- */
 .karten { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
 .karte {
   position: relative;

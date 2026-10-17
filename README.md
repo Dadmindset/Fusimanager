@@ -1,6 +1,6 @@
 # ⚽ Liga-Simulator
 
-Ein Fußball-Manager für die Familie – gespielt mit euren echten Fusi-Karten (Panini-Sticker der WM 2026).
+Ein Fußball-Manager für die Familie – gespielt mit euren echten Fusi-Karten (Sammelsticker zur WM 2026).
 Ihr zieht Karten vom Stapel, tippt sie ins Spiel ein, stellt eure Mannschaft auf und
 der Computer spielt eine ganze Liga-Saison mit Live-Ticker, Tabelle, Torschützenliste und Finale.
 
@@ -53,8 +53,8 @@ Alle Zahlen könnt ihr im Spiel unter ⚙️ **Einstellungen** ändern.
 index.html            Die Seite selbst. Lädt alle anderen Dateien.
 style.css             Das Aussehen: Farben, Schriften, Karten-Design.
 daten/
-  spielset.js         EURE Karten (121 Spieler). Hier tragt ihr neue Karten ein!
-  computer-pool.js    Alle anderen WM-Sticker (743) – nur für die Computer-Gegner.
+  spielset.js         EURE Karten (122 Spieler). Hier tragt ihr neue Karten ein!
+  computer-pool.js    Alle anderen WM-Sticker (742) – nur für die Computer-Gegner.
   laender.js          Die 48 WM-Länder: Stadt, Temperaturen, Feiertage.
 js/
   einstellungen.js    Alle Spielregeln mit Standardwerten (X, y, h, i, j, k …).
@@ -89,7 +89,7 @@ sagt das Spiel: „Den hat schon …! Lege die Karte zurück und ziehe eine neue
 
 - Sticker-Nummern und Namen aller 980 Sticker: [scanini.app](https://scanini.app/albums/world-cup-2026)
 - Verein und Geburtsdatum eurer Karten: abgelesen von euren Fotos.
-- Positionen: Panini-Reihenfolge (Torwart → Abwehr → Mittelfeld → Sturm).
+- Positionen: Album-Reihenfolge (Torwart → Abwehr → Mittelfeld → Sturm).
 - Stärken (50–99): geschätzt, angelehnt an FC-26-Werte. Ändert sie gerne!
 
 ## Ideen für später

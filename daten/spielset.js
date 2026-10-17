@@ -1,5 +1,5 @@
 // =====================================================================
-// SPIELSET – die Panini-Karten, die ihr wirklich (physisch) habt.
+// SPIELSET – die Fusi-Karten, die ihr wirklich (physisch) habt.
 // =====================================================================
 // Jede Zeile ist eine Karte. So ist eine Zeile aufgebaut:
 //   id        = Sticker-Nummer aus dem Album (z. B. "BRA 8") – eindeutig!
@@ -140,4 +140,5 @@ const SPIELSET = [
   { id: "TUR 8", name: "Ferdi Kadıoğlu", land: "TUR", verein: "Brighton & Hove Albion FC (ENG)", pos: "AB", staerke: 79, geb: "07.10.1999", staerken: "Dribbelstarker Außenverteidiger", schwaechen: "Kopfball" },
   { id: "ARG 8", name: "Enzo Fernández", land: "ARG", verein: "Chelsea FC (ENG)", pos: "MF", staerke: 85, geb: "17.01.2001", staerken: "Weltmeister 2022, bester junger Spieler der WM 2022", schwaechen: "Tempo" },
   { id: "EGY 18", name: "Mostafa Mohamed", land: "EGY", verein: "FC Nantes (FRA)", pos: "ST", staerke: 75, geb: "28.11.1997", staerken: "Kräftiger Mittelstürmer", schwaechen: "Tempo" },
+  { id: "NED 6", name: "Denzel Dumfries", land: "NED", verein: "FC Internazionale Milano (ITA)", pos: "AB", staerke: 83, geb: "18.04.1996", staerken: "Torgefährlicher Rechtsverteidiger, stark im Kopfball", schwaechen: "Spielaufbau unter Druck" },
 ];

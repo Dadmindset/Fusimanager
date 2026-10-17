@@ -78,14 +78,14 @@ Eine neue Claude-Sitzung soll es lesen und auf dieser Basis das Spiel bauen.
   Schwierigkeit steigt mit dem Spielfortschritt: anfangs würfelt der Computer die Aufstellung zufällig,
   später stellt er taktisch auf (ab welcher Runde, hängt vom Level ab). Level 3 zieht „bester aus 2“.
 - **Mannschaftssticker (Wappen):** kommen später (Fotos folgen). Idee: gezogenes Wappen stärkt alle Spieler dieses Landes im Team.
-- Spieler-Bilder: Es gibt keine freie Quelle für Panini-Bilder. Erst Flagge + Initialen; optional später eigene Fotos der Karten
+- Spieler-Bilder: Es gibt keine freie Quelle für Bilder der Sammelkarten. Erst Flagge + Initialen; optional später eigene Fotos der Karten
   (Feld `bild` in den Spielerdaten).
 
 ## Computer-Pool (offener Punkt)
 
 **Erledigt:** Die Liste aller 864 Spieler-Sticker wurde von https://scanini.app/albums/world-cup-2026 geladen.
-Alle 121 Karten des Spielsets sind darin gefunden; die übrigen 743 bilden den Computer-Pool (`daten/computer-pool.js`).
-Positionen nach Panini-Reihenfolge korrigiert: Ibrahim Sabra und Elijah Just = Sturm, Saleh Abu Alshamat = Mittelfeld.
+Alle Karten des Spielsets sind darin gefunden (inzwischen 122); die übrigen 742 bilden den Computer-Pool (`daten/computer-pool.js`).
+Positionen nach Album-Reihenfolge korrigiert: Ibrahim Sabra und Elijah Just = Sturm, Saleh Abu Alshamat = Mittelfeld.
 Album: 48 Teams × 20 Sticker (Wappen, Teamfoto, 18 Spieler) + 20 Sonder-Sticker = 980.
 
 48 Teams: USA, MEX, CAN · JPN, IRN, UZB, KOR, JOR, AUS, QAT, KSA, IRQ · MAR, TUN, EGY, ALG, GHA, CPV, RSA, SEN, CIV, COD ·
@@ -93,7 +93,7 @@ ARG, BRA, ECU, URU, COL, PAR · NZL · PAN, HAI, CUW · ENG, FRA, CRO, POR, NOR,
 
 ## Das Spielset (von den Fotos abgelesen)
 
-**124 physische Karten = 121 verschiedene Spieler.** Doppelt vorhanden: Wesley, Leandro Bacuna, Hyeongyu Oh.
+**125 physische Karten = 122 verschiedene Spieler** (Denzel Dumfries nachgetragen). Doppelt vorhanden: Wesley, Leandro Bacuna, Hyeongyu Oh.
 Verein und Geburtsdatum laut Sticker. Position und Stärke sind ein erster Vorschlag (bitte in der Recherche prüfen).
 Farbe des Namensbalkens auf dem Sticker scheint die Position zu zeigen: lila = TW, rosa = AB, orange = MF, dunkelblau = ST.
 
@@ -220,8 +220,9 @@ Farbe des Namensbalkens auf dem Sticker scheint die Position zu zeigen: lila = T
 | 119 | Ferdi Kadıoğlu | TUR | Brighton & Hove Albion FC (ENG) | 07.10.1999 | AB | 79 |
 | 120 | Enzo Fernández | ARG | Chelsea FC (ENG) | 17.01.2001 | MF | 85 |
 | 121 | Mostafa Mohamed | EGY | FC Nantes (FRA) | 28.11.1997 | ST | 75 |
+| 122 | Denzel Dumfries (nachgetragen) | NED | FC Internazionale Milano (ITA) | 18.04.1996 | AB | 83 |
 
-Im Set sind 47 der 48 WM-Nationen vertreten (nur NED fehlt).
+Mit Denzel Dumfries sind alle 48 WM-Nationen im Set vertreten.
 
 **Teamgeist-Gruppen im Set (gleicher Verein laut Sticker):**
 Liverpool (Alisson, Mac Allister, Isak, Konaté) · Napoli (McTominay, Gilmour) · Benfica (Ríos, Dedić) · Braga (Lagerbielke, Grillitsch) ·
@@ -232,7 +233,7 @@ Al-Ahli Saudi (Mahrez, Abu Alshamat) · Çaykur Rizespor (Fofana, Aliqulov).
 
 ## Änderungen nach Version 1.0
 
-- Startseite: „Der Fußball-Manager mit euren Fusi-Karten“ (nicht mehr „Panini“).
+- Startseite: „Der Fußball-Manager mit euren Fusi-Karten“.
 - Neue Variable **l**: Computer-Teams pro Teilnehmer (Standard 3). Bei ungerader Teamzahl hat pro Spieltag ein Team spielfrei.
 - Live-Ticker: Heim blau, Gast orange; „⚽ TOR für …“; Torübersicht (Minute, Torschütze, Vorlage, Verein) an der Seite.
 - Neue Variable **m**: Halbzeitpause im Ticker (Standard 5 Sekunden).
@@ -250,7 +251,7 @@ Al-Ahli Saudi (Mahrez, Abu Alshamat) · Çaykur Rizespor (Fofana, Aliqulov).
 
 ## Ursprünglich geplante Schritte (erledigt)
 
-1. Panini-Checkliste von scanini.app laden → Computer-Pool (alle Sticker außer dem Spielset).
+1. Sticker-Checkliste von scanini.app laden → Computer-Pool (alle Sticker außer dem Spielset).
 2. Spielerdaten recherchieren und ergänzen (Stärken, Schwächen, Länderspiele, internationale Erfahrung).
 3. Web-App bauen (Dateien z. B. `index.html`, `style.css`, `js/…`, `daten/…`, `bilder/…`), jeden Schritt erklären.
 4. Testen, committen, pushen, Link fürs Handy bereitstellen.

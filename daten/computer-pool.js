@@ -1,9 +1,9 @@
 // =====================================================================
-// COMPUTER-POOL – alle übrigen Panini-Sticker der WM 2026.
+// COMPUTER-POOL – alle übrigen Sammelsticker zur WM 2026.
 // =====================================================================
 // Quelle der Namen und Nummern: scanini.app (Checkliste, Oktober 2026).
 // Die Computer-Gegner ziehen NUR aus dieser Liste – nie aus eurem Spielset.
-// Position: aus der Panini-Reihenfolge (Torwart, Abwehr, Mittelfeld, Sturm).
+// Position: aus der Album-Reihenfolge (Torwart, Abwehr, Mittelfeld, Sturm).
 // Stärke: geschätzt (angelehnt an FC-26-Werte). Darf gern angepasst werden!
 // Den Verein kennen wir hier nicht – Teamgeist gibt es beim Computer
 // deshalb nur über die Nationalmannschaft.
@@ -478,7 +478,6 @@ const COMPUTER_POOL = [
   { id: "NED 3", name: "Virgil van Dijk", land: "NED", pos: "AB", staerke: 89 },
   { id: "NED 4", name: "Micky van de Ven", land: "NED", pos: "AB", staerke: 84 },
   { id: "NED 5", name: "Jurrien Timber", land: "NED", pos: "AB", staerke: 83 },
-  { id: "NED 6", name: "Denzel Dumfries", land: "NED", pos: "AB", staerke: 83 },
   { id: "NED 7", name: "Nathan Aké", land: "NED", pos: "AB", staerke: 81 },
   { id: "NED 8", name: "Jeremie Frimpong", land: "NED", pos: "AB", staerke: 82 },
   { id: "NED 9", name: "Jan Paul van Hecke", land: "NED", pos: "AB", staerke: 79 },

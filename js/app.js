@@ -60,7 +60,7 @@ function initialen(name) {
   return (teile.length > 1 ? teile[0][0] + teile[teile.length - 1][0] : name.slice(0, 2)).toUpperCase();
 }
 
-// Eine Panini-Karte als Knopf. optionen: { aktion, gewaehlt, kapitaen, teamIndex, klein }
+// Eine Fusi-Karte als Knopf. optionen: { aktion, gewaehlt, kapitaen, teamIndex, klein }
 function karteHtml(id, optionen = {}) {
   const sp = ALLE_SPIELER[id];
   const verletzt = spiel && istVerletzt(id);

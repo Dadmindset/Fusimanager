@@ -32,6 +32,7 @@ const EINSTELLUNGEN_LISTE = {
   feiertagDanachMalus:{ wert: 20, min: 0, max: 100, text: "Tag nach dem Feiertag: Abzug in %" },
   tickerSekunden:     { wert: 20, min: 3, max: 90, text: "Dauer des Live-Tickers in Sekunden" },
   halbzeitSekunden:   { wert: 5,  min: 0, max: 60, text: "Halbzeitpause im Live-Ticker in Sekunden (m)" },
+  wechselSekunden:    { wert: 10, min: 3, max: 60, text: "Zeit für „Spieler wechseln“ in der Halbzeit, Sekunden pro Spieler (n)" },
 };
 
 // EINST enthält die aktuell gültigen Werte, z. B. EINST.startKarten

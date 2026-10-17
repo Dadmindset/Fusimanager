@@ -23,6 +23,9 @@ Der Spielstand wird im Browser gespeichert. Ihr könnt jederzeit aufhören und s
    Der Knopf 💡 gibt Tipps, 🪄 macht einen Vorschlag.
 5. **Live-Ticker** – eure Spiele laufen ab: Heim blau, Gast orange, mit Torübersicht an der Seite
    und einer Halbzeitpause. Die Spiele der Computer untereinander stehen in der Auswertung.
+   **In der Halbzeit** erscheint der Knopf „🔄 Spieler wechseln“ – erst für das Heimteam, dann für das Gastteam,
+   jeweils 10 Sekunden lang (Einstellung „n“). Ein Wechsel pro Spiel: einer geht raus, einer von der Bank kommt rein.
+   Die 2. Halbzeit wird erst danach ausgerechnet – der Wechsel zählt also wirklich.
 6. **Auswertung** – Ergebnisse, Tabelle mit Auf- und Abstieg, Scorerliste.
 
 Nach dem letzten Spieltag spielen Platz 1 und Platz 2 das **Finale**, danach gibt es die **Pokalübergabe**.

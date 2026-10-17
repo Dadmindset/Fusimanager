@@ -19,6 +19,11 @@ const ui = {
   tickerIndex: 0,
   tickerUhr: null,
   pauseRest: 0,       // Sekunden, die die Halbzeitpause noch dauert
+  inHalbzeit: false,  // läuft gerade die Halbzeitpause?
+  wechselWarteschlange: [], // wer in dieser Halbzeit noch wechseln darf (erst Heim, dann Gast)
+  wechselAktiv: null, // Team, das gerade den Knopf "Spieler wechseln" sieht
+  wechselRest: 0,     // Sekunden, die der Knopf noch sichtbar ist
+  wechselDialog: null, // offener Wechsel: { team, raus, rein }
   neuBestaetigen: false,
 };
 
@@ -326,12 +331,14 @@ SEITEN.bestaetigen = function () {
     '<button class="knopf haupt" data-aktion="soSpielen">✅ So spielen</button></div></section>';
 };
 
-// Live-Ticker: zeigt nur die Spiele, in denen ein Mensch mitspielt.
+// Live-Ticker: zeigt nur die Spiele, in denen ein Mensch mitspielt (siehe livePartien).
 // Die Spiele der Computer untereinander stehen danach in der Auswertung.
 function tickerPartien() {
-  const partien = spiel.runden[spiel.runde].partien;
-  const mitMenschen = partien.filter((p) => spiel.teams[p.heim].mensch || spiel.teams[p.gast].mensch);
-  return mitMenschen.length ? mitMenschen : partien;
+  return livePartien();
+}
+
+function aktuellePartie() {
+  return tickerPartien()[ui.spielNr];
 }
 
 // "heim" oder "gast" – bestimmt die Farbe (Heim blau, Gast orange)
@@ -372,11 +379,38 @@ function torUebersicht(partie, sichtbar) {
   return html + "</tbody></table></div></aside>";
 }
 
+// Halbzeit: Knopf "Spieler wechseln" mit Countdown oder die Auswahl für den Wechsel
+function wechselHtml(partie) {
+  if (!ui.inHalbzeit) return "";
+  if (ui.wechselDialog) {
+    const d = ui.wechselDialog;
+    const bank = ersatzbank(partie, d.team);
+    return '<div class="kasten wechsel ' + seiteVon(partie, d.team) + '">' +
+      "<h3>🔄 " + teamName(d.team) + ": Spieler wechseln</h3>" +
+      "<p><b>1. Wer geht raus?</b></p>" +
+      '<div class="karten">' + partie.aufstellung[d.team].map((id) =>
+        karteHtml(id, { aktion: "wechselRaus", gewaehlt: d.raus === id, klein: true, kapitaen: partie.kapitaen[d.team] === id })).join("") + "</div>" +
+      "<p><b>2. Wer kommt rein?</b></p>" +
+      (bank.length ? '<div class="karten">' + bank.map((id) =>
+        karteHtml(id, { aktion: "wechselRein", gewaehlt: d.rein === id, klein: true })).join("") + "</div>"
+        : '<p class="leise">Auf deiner Bank sitzt niemand, der spielen kann.</p>') +
+      '<div class="knopfreihe"><button class="knopf" data-aktion="wechselAbbrechen">Abbrechen</button>' +
+      '<button class="knopf haupt" data-aktion="wechselBestaetigen"' + (d.raus && d.rein ? "" : " disabled") + ">✅ Wechseln</button></div></div>";
+  }
+  if (ui.wechselAktiv !== null) {
+    return '<div class="kasten wechsel-angebot ' + seiteVon(partie, ui.wechselAktiv) + '">' +
+      '<button class="knopf haupt gross-knopf" data-aktion="wechselStarten">🔄 Spieler wechseln – ' + sicher(spiel.teams[ui.wechselAktiv].name) + "</button>" +
+      '<p class="countdown">Noch <b>' + ui.wechselRest + "</b> Sekunden</p>" +
+      '<button class="knopf" data-aktion="keinWechsel">Kein Wechsel</button></div>';
+  }
+  return "";
+}
+
 SEITEN.spiele = function () {
   const liste = tickerPartien();
   const partie = liste[ui.spielNr];
   const sichtbar = partie.ereignisse.slice(0, ui.tickerIndex);
-  const fertig = ui.tickerIndex >= partie.ereignisse.length;
+  const fertig = ui.tickerIndex >= partie.ereignisse.length && partie.haelfte === 2 && !ui.inHalbzeit;
   const toreH = sichtbar.filter((e) => e.typ === "tor" && e.team === partie.heim).length;
   const toreG = sichtbar.filter((e) => e.typ === "tor" && e.team === partie.gast).length;
   const letztes = sichtbar[sichtbar.length - 1];
@@ -399,7 +433,7 @@ SEITEN.spiele = function () {
 
   let anzeige;
   if (fertig) anzeige = partie.elfmeter ? "n. E. " + partie.elfmeter.heim + ":" + partie.elfmeter.gast : "Abpfiff";
-  else if (ui.pauseRest > 0) anzeige = "⏸️ Halbzeitpause – weiter in " + ui.pauseRest + " Sek.";
+  else if (ui.inHalbzeit) anzeige = "⏸️ Halbzeitpause" + (ui.pauseRest > 0 && ui.wechselAktiv === null && !ui.wechselDialog ? " – weiter in " + ui.pauseRest + " Sek." : "");
   else anzeige = minute + ". Minute";
 
   const naechster = ui.spielNr + 1 < liste.length
@@ -415,6 +449,7 @@ SEITEN.spiele = function () {
     '<span class="tafel-team gast' + (jubel === "gast" ? " jubel" : "") + '"><small>GAST</small>' + teamName(partie.gast) + "</span>" +
     '<span class="tafel-minute">' + anzeige + "</span>" +
     "</div>" +
+    wechselHtml(partie) +
     '<div class="spiel-layout">' +
     '<div class="spiel-haupt">' +
     '<div class="aufstellungen">' + aufstellungListe(partie, partie.heim) + aufstellungListe(partie, partie.gast) + "</div>" +
@@ -422,7 +457,8 @@ SEITEN.spiele = function () {
     "</div>" +
     torUebersicht(partie, sichtbar) +
     "</div>" +
-    '<div class="knopfreihe">' + (fertig ? naechster : '<button class="knopf" data-aktion="ueberspringen">⏩ Überspringen</button>') + "</div>" +
+    '<div class="knopfreihe">' + (fertig ? naechster
+      : ui.wechselAktiv !== null || ui.wechselDialog ? "" : '<button class="knopf" data-aktion="ueberspringen">⏩ Überspringen</button>') + "</div>" +
     (fertig && andere > 0 && ui.spielNr + 1 >= liste.length ? '<p class="leise">Die anderen ' + andere + " Spiele dieses Spieltags seht ihr in der Auswertung.</p>" : "") +
     "</section>";
 };
@@ -574,31 +610,83 @@ function naechsterMensch() {
 function tickerStarten() {
   clearTimeout(ui.tickerUhr);
   ui.tickerIndex = 0;
+  ui.inHalbzeit = false;
   ui.pauseRest = 0;
+  ui.wechselWarteschlange = [];
+  ui.wechselAktiv = null;
+  ui.wechselDialog = null;
   gehe("spiele");
-  ui.tickerUhr = setTimeout(tickerSchritt, tickerPause());
+  tickerWeiter();
 }
 
-// Wie lange zwischen zwei Ticker-Meldungen gewartet wird
+// Plant den nächsten Ticker-Schritt (in der Halbzeit jede Sekunde)
+function tickerWeiter() {
+  clearTimeout(ui.tickerUhr);
+  if (ui.wechselDialog) return; // die Uhr steht, solange jemand wechselt
+  const partie = aktuellePartie();
+  if (ui.inHalbzeit) ui.tickerUhr = setTimeout(tickerSchritt, 1000);
+  else if (ui.tickerIndex < partie.ereignisse.length) ui.tickerUhr = setTimeout(tickerSchritt, tickerPause());
+}
+
+// Jede Halbzeit dauert etwa die Hälfte der eingestellten Ticker-Zeit
 function tickerPause() {
-  const partie = tickerPartien()[ui.spielNr];
-  return (EINST.tickerSekunden * 1000) / Math.max(1, partie.ereignisse.length);
+  const partie = aktuellePartie();
+  const halbzeitIndex = partie.ereignisse.findIndex((e) => e.typ === "halbzeit");
+  const anzahl = ui.tickerIndex <= halbzeitIndex ? halbzeitIndex + 1 : partie.ereignisse.length - halbzeitIndex - 1;
+  return (EINST.tickerSekunden * 500) / Math.max(1, anzahl);
 }
 
-// Zeigt die nächste Meldung. Nach der Halbzeit-Meldung wird m Sekunden pausiert.
 function tickerSchritt() {
-  const partie = tickerPartien()[ui.spielNr];
-  if (ui.pauseRest > 0) {
-    ui.pauseRest--;
+  const partie = aktuellePartie();
+  if (ui.inHalbzeit) {
+    const vorher = ui.wechselAktiv;
+    if (ui.pauseRest > 0) ui.pauseRest--;
+    if (ui.wechselAktiv !== null) {
+      ui.wechselRest--;
+      if (ui.wechselRest <= 0) naechstesWechselFenster();
+    }
+    if (ui.wechselAktiv === null && ui.pauseRest <= 0) halbzeitBeenden(partie);
+    // Hat sich nur die Sekundenzahl geändert, wird nur sie neu geschrieben.
+    // So bleibt der Knopf stehen und ein Tippen geht nicht verloren.
+    if (ui.inHalbzeit && vorher === ui.wechselAktiv && ui.seite === "spiele") {
+      const zahl = document.querySelector(".countdown b");
+      if (zahl) zahl.textContent = ui.wechselRest;
+      const tafel = document.querySelector(".tafel-minute");
+      if (tafel && ui.wechselAktiv === null) tafel.textContent = "⏸️ Halbzeitpause – weiter in " + ui.pauseRest + " Sek.";
+      tickerWeiter();
+      return;
+    }
   } else {
     ui.tickerIndex++;
     const letztes = partie.ereignisse[ui.tickerIndex - 1];
-    if (letztes && letztes.typ === "halbzeit") ui.pauseRest = EINST.halbzeitSekunden;
+    if (letztes && letztes.typ === "halbzeit") halbzeitBeginnen(partie);
   }
   if (ui.seite === "spiele") zeige();
-  if (ui.tickerIndex < partie.ereignisse.length) {
-    ui.tickerUhr = setTimeout(tickerSchritt, ui.pauseRest > 0 ? 1000 : tickerPause());
-  }
+  tickerWeiter();
+}
+
+// Halbzeitpause beginnt: Menschen dürfen wechseln – erst Heim, dann Gast
+function halbzeitBeginnen(partie) {
+  ui.inHalbzeit = true;
+  ui.pauseRest = EINST.halbzeitSekunden;
+  // Nur solange die 2. Halbzeit noch nicht gerechnet ist (z. B. nicht nach dem Neuladen)
+  ui.wechselWarteschlange = partie.haelfte < 2 ? [partie.heim, partie.gast].filter((t) => spiel.teams[t].mensch) : [];
+  naechstesWechselFenster();
+}
+
+function naechstesWechselFenster() {
+  ui.wechselAktiv = ui.wechselWarteschlange.length ? ui.wechselWarteschlange.shift() : null;
+  ui.wechselRest = EINST.wechselSekunden;
+}
+
+// Halbzeitpause vorbei: jetzt erst wird die 2. Halbzeit gerechnet (mit den Wechseln)
+function halbzeitBeenden(partie) {
+  ui.inHalbzeit = false;
+  ui.wechselAktiv = null;
+  ui.wechselDialog = null;
+  ui.wechselWarteschlange = [];
+  ui.pauseRest = 0;
+  if (partie.haelfte < 2) halbzeitSimulieren(partie, 2);
 }
 
 function aufstellungBeginnen() {
@@ -738,13 +826,49 @@ const AKTIONEN = {
     naechsterMensch();
   },
   ueberspringen() {
-    clearTimeout(ui.tickerUhr);
-    ui.pauseRest = 0;
-    ui.tickerIndex = tickerPartien()[ui.spielNr].ereignisse.length;
+    const partie = aktuellePartie();
+    const halbzeitIndex = partie.ereignisse.findIndex((e) => e.typ === "halbzeit");
+    if (!ui.inHalbzeit && ui.tickerIndex <= halbzeitIndex) {
+      // In der 1. Halbzeit: direkt zur Halbzeit springen – wechseln bleibt möglich
+      ui.tickerIndex = halbzeitIndex + 1;
+      halbzeitBeginnen(partie);
+      ui.pauseRest = 0;
+    }
+    if (ui.wechselAktiv === null) {
+      // Niemand darf (mehr) wechseln → bis zum Abpfiff springen
+      halbzeitBeenden(partie);
+      ui.tickerIndex = partie.ereignisse.length;
+    }
+    zeige();
+    tickerWeiter();
+  },
+  wechselStarten() {
+    ui.wechselDialog = { team: ui.wechselAktiv, raus: null, rein: null };
+    tickerWeiter(); // hält die Uhr an
     zeige();
   },
+  wechselRaus(id) { ui.wechselDialog.raus = id; zeige(); },
+  wechselRein(id) { ui.wechselDialog.rein = id; zeige(); },
+  wechselBestaetigen() {
+    const d = ui.wechselDialog;
+    spielerWechseln(aktuellePartie(), d.team, d.raus, d.rein);
+    ui.wechselDialog = null;
+    naechstesWechselFenster();
+    zeige();
+    tickerWeiter();
+  },
+  wechselAbbrechen() {
+    ui.wechselDialog = null;
+    naechstesWechselFenster();
+    zeige();
+    tickerWeiter();
+  },
+  keinWechsel() { naechstesWechselFenster(); zeige(); },
   naechstesSpiel() { ui.spielNr++; tickerStarten(); },
-  zurAuswertung() { gehe("auswertung"); },
+  zurAuswertung() {
+    spieltagAbschliessen(); // fehlende 2. Halbzeiten rechnen, Müdigkeit zählen
+    gehe("auswertung");
+  },
   naechsteRunde() {
     if (spiel.runde >= spiel.spielplan.length) {
       // Saison vorbei → Finale Platz 1 gegen Platz 2

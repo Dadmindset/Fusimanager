@@ -418,3 +418,15 @@ tr.gast .team-punkt { background: var(--gast); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* ---------- Spielerwechsel in der Halbzeit ---------- */
+.wechsel-angebot { align-items: center; text-align: center; border-width: 3px; }
+.wechsel-angebot.heim, .wechsel.heim { border-color: var(--heim); background: var(--heim-hell); }
+.wechsel-angebot.gast, .wechsel.gast { border-color: var(--gast); background: var(--gast-hell); }
+.wechsel { border-width: 3px; }
+.gross-knopf { font-size: 1.25rem; padding: 16px 26px; animation: pulsieren 1.2s ease-in-out infinite; }
+.wechsel-angebot.heim .gross-knopf { background: var(--heim); border-color: var(--heim); }
+.wechsel-angebot.gast .gross-knopf { background: var(--gast); border-color: var(--gast); }
+.countdown { font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+.ereignis.wechsel { font-weight: 800; }
+@keyframes pulsieren { 50% { box-shadow: 0 0 0 8px var(--flutlicht); } }

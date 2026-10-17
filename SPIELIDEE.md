@@ -29,6 +29,7 @@ Eine neue Claude-Sitzung soll es lesen und auf dieser Basis das Spiel bauen.
 | c | Anzahl Computer-Teams = l × Anzahl Teilnehmer | – |
 | l | Computer-Teams pro Teilnehmer (2 Teilnehmer → 6 Computer-Gegner) | 3 |
 | m | Halbzeitpause im Live-Ticker in Sekunden | 5 |
+| n | Zeitfenster für „Spieler wechseln“ in der Halbzeit, Sekunden pro Spieler | 10 |
 | i | Ermüdung ab dem i-ten Spiel in Folge (−10 % pro weiterem Spiel, Verletzungsrisiko steigt) | 4 |
 | k | Tipp warnt nach k Spielen in Folge | 3 |
 | j | Zufallsverletzung alle j Runden (fällt 1 Spiel aus) | 4 |
@@ -38,7 +39,7 @@ Eine neue Claude-Sitzung soll es lesen und auf dieser Basis das Spiel bauen.
 | – | Feiertag am Spieltag / Tag danach | −50 % / −20 % (abgemildert statt Totalausfall) |
 | – | Kapitän-Bonus | +10 % |
 | – | Computer-Level | 1–3 (einstellbar) |
-| n | Bonus-Ziehen aus Stickern, die man physisch nicht hat (Chance auf Messi/Mbappé) | **später**, nicht im MVP |
+| o | Bonus-Ziehen aus Stickern, die man physisch nicht hat (Chance auf Messi/Mbappé) | **später**, nicht im MVP |
 
 ## Spielablauf (Entscheidungen)
 
@@ -236,6 +237,10 @@ Al-Ahli Saudi (Mahrez, Abu Alshamat) · Çaykur Rizespor (Fofana, Aliqulov).
 - Live-Ticker: Heim blau, Gast orange; „⚽ TOR für …“; Torübersicht (Minute, Torschütze, Vorlage, Verein) an der Seite.
 - Neue Variable **m**: Halbzeitpause im Ticker (Standard 5 Sekunden).
 - Live-Ticker zeigt nur Spiele mit menschlicher Beteiligung; die übrigen Ergebnisse stehen in der Auswertung.
+
+- **Spielerwechsel in der Halbzeit:** Bei Spielen mit Spielteilnehmern erscheint in der Halbzeitpause der Knopf
+  „Spieler wechseln“ mit n Sekunden Countdown – erst für das Heimteam, dann für das Gastteam (nie gleichzeitig).
+  Ein Wechsel pro Team und Spiel; die 2. Halbzeit wird erst danach gerechnet, der Wechsel zählt also.
 
 ## Offene Punkte
 

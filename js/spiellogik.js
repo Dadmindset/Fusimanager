@@ -536,19 +536,33 @@ const TOR_ART_GEWICHTE = [42, 20, 12, 10, 9, 7];
 const TOR_GEWICHT = { TW: 0.02, AB: 1, MF: 2.5, ST: 5 };
 const VORLAGE_GEWICHT = { TW: 0.3, AB: 1.5, MF: 4, ST: 2.5 };
 
-function simulieren(partie) {
+// Rechnet EINE Halbzeit: haelfte 1 = Minute 1–45, haelfte 2 = Minute 46–90.
+// Die 2. Halbzeit wird bei euren Spielen erst nach der Halbzeitpause gerechnet –
+// so zählt ein Spielerwechsel wirklich.
+function halbzeitSimulieren(partie, haelfte) {
   const werte = { [partie.heim]: teamWerte(partie.heim, partie), [partie.gast]: teamWerte(partie.gast, partie) };
+  const vonMinute = haelfte === 1 ? 1 : 46;
+  const bisMinute = haelfte === 1 ? 45 : 90;
+  const zufallsMinute = () => vonMinute + Math.floor(Math.random() * (bisMinute - vonMinute + 1));
   const ereignisse = [];
   const name = (id) => ALLE_SPIELER[id].name;
   const gegnerVon = (t) => (t === partie.heim ? partie.gast : partie.heim);
-  partie.toreHeim = 0;
-  partie.toreGast = 0;
 
-  ereignisse.push({ minute: 0, typ: "info", text: textBauen(TEXTE.anpfiff, { stadt: partie.stadt }) });
+  // Wer in dieser Halbzeit auf dem Platz stand, hat "gespielt" (wichtig für die Müdigkeit)
+  partie.eingesetzt = partie.eingesetzt || {};
   for (const t of [partie.heim, partie.gast]) {
-    if (werte[t].notTorwart) {
-      ereignisse.push({ minute: 0, typ: "info", team: t,
-        text: textBauen(TEXTE.notTorwart, { team: spiel.teams[t].name, spieler: name(werte[t].torwart.id) }) });
+    partie.eingesetzt[t] = [...new Set([...(partie.eingesetzt[t] || []), ...(partie.aufstellung[t] || [])])];
+  }
+
+  if (haelfte === 1) {
+    partie.toreHeim = 0;
+    partie.toreGast = 0;
+    ereignisse.push({ minute: 0, typ: "info", text: textBauen(TEXTE.anpfiff, { stadt: partie.stadt }) });
+    for (const t of [partie.heim, partie.gast]) {
+      if (werte[t].notTorwart) {
+        ereignisse.push({ minute: 0, typ: "info", team: t,
+          text: textBauen(TEXTE.notTorwart, { team: spiel.teams[t].name, spieler: name(werte[t].torwart.id) }) });
+      }
     }
   }
 
@@ -556,11 +570,11 @@ function simulieren(partie) {
     const eigene = werte[t];
     const gegner = werte[gegnerVon(t)];
     if (!eigene.feld.length) continue;
-    const erwartet = erwarteteTore(eigene, gegner);
+    const erwartet = erwarteteTore(eigene, gegner); // erwartete Tore für 90 Minuten
     const torwartName = gegner.torwart ? name(gegner.torwart.id) : "der Torwart";
 
     // Tore: jede Minute eine kleine Chance
-    for (let minute = 1; minute <= 90; minute++) {
+    for (let minute = vonMinute; minute <= bisMinute; minute++) {
       if (Math.random() < erwartet / 90) {
         const art = gewichteterZufall(TOR_ARTEN, TOR_ART_GEWICHTE);
         const schuetze = gewichteterZufall(eigene.feld, eigene.feld.map((s) => s.wert * TOR_GEWICHT[s.pos])).id;
@@ -579,18 +593,18 @@ function simulieren(partie) {
     }
 
     // Chancen, Paraden und Karten – damit der Ticker spannend wird
-    const anzahlChancen = Math.round(erwartet * 1.5 + Math.random() * 2);
+    const anzahlChancen = Math.round((erwartet * 1.5 + Math.random() * 2) / 2);
     for (let i = 0; i < anzahlChancen; i++) {
       const sp = gewichteterZufall(eigene.feld, eigene.feld.map((s) => s.wert * TOR_GEWICHT[s.pos])).id;
       const parade = Math.random() < 0.5 && gegner.torwart;
       ereignisse.push({
-        minute: 1 + Math.floor(Math.random() * 90), typ: parade ? "parade" : "chance", team: t,
+        minute: zufallsMinute(), typ: parade ? "parade" : "chance", team: t,
         text: textBauen(parade ? TEXTE.parade : TEXTE.chance, { spieler: name(sp), team: spiel.teams[t].name, torwart: torwartName }),
       });
     }
-    if (Math.random() < 0.6) {
+    if (Math.random() < 0.3) {
       const sp = zufall(eigene.feld).id;
-      ereignisse.push({ minute: 1 + Math.floor(Math.random() * 90), typ: "gelb", team: t, text: textBauen(TEXTE.gelb, { spieler: name(sp) }) });
+      ereignisse.push({ minute: zufallsMinute(), typ: "gelb", team: t, text: textBauen(TEXTE.gelb, { spieler: name(sp) }) });
     }
   }
 
@@ -598,34 +612,57 @@ function simulieren(partie) {
   const verletzte = [];
   for (const t of [partie.heim, partie.gast]) {
     for (const s of werte[t].spieler) {
-      // Müde Spieler verletzen sich leichter
+      // Müde Spieler verletzen sich leichter (pro Halbzeit die halbe Gefahr)
       const inFolge = status(s.id).inFolge + 1;
-      if (inFolge >= EINST.muedeAb && Math.random() < 0.07 * (inFolge - EINST.muedeAb + 1)) verletzte.push({ t, id: s.id });
+      if (inFolge >= EINST.muedeAb && Math.random() < 0.035 * (inFolge - EINST.muedeAb + 1)) verletzte.push({ t, id: s.id });
     }
   }
-  // Alle j Runden erwischt es zufällig einen Spieler
-  if (EINST.verletzungAlle > 0 && spiel.runde % EINST.verletzungAlle === 0 && !spiel.finale) {
+  // Alle j Runden erwischt es zufällig einen Spieler (in der 1. Halbzeit)
+  if (haelfte === 1 && EINST.verletzungAlle > 0 && spiel.runde % EINST.verletzungAlle === 0 && !spiel.finale) {
     const t = zufall([partie.heim, partie.gast]);
     if (werte[t].spieler.length) verletzte.push({ t, id: zufall(werte[t].spieler).id });
   }
   for (const { t, id } of verletzte) {
     if (status(id).verletztFuer === spiel.runde + 1) continue;
     status(id).verletztFuer = spiel.runde + 1;
-    ereignisse.push({ minute: 1 + Math.floor(Math.random() * 90), typ: "verletzung", team: t, spieler: id, text: textBauen(TEXTE.verletzung, { spieler: name(id) }) });
+    ereignisse.push({ minute: zufallsMinute(), typ: "verletzung", team: t, spieler: id, text: textBauen(TEXTE.verletzung, { spieler: name(id) }) });
   }
 
-  ereignisse.push({ minute: 45, typ: "halbzeit", text: textBauen(TEXTE.halbzeit, {}) });
   ereignisse.sort((a, b) => a.minute - b.minute);
-  ereignisse.push({ minute: 90, typ: "info", text: textBauen(TEXTE.abpfiff, {}) });
-
-  // Im Finale gibt es keinen Sieger per Unentschieden → Elfmeterschießen
-  if (spiel.finale && partie.toreHeim === partie.toreGast) {
-    partie.elfmeter = elfmeterschiessen(werte[partie.heim], werte[partie.gast]);
-    ereignisse.push({ minute: 120, typ: "info", text: "Elfmeterschießen! " + partie.elfmeter.heim + " : " + partie.elfmeter.gast });
+  if (haelfte === 1) {
+    ereignisse.push({ minute: 45, typ: "halbzeit", text: textBauen(TEXTE.halbzeit, {}) });
+  } else {
+    ereignisse.push({ minute: 90, typ: "info", text: textBauen(TEXTE.abpfiff, {}) });
+    // Im Finale gibt es keinen Sieger per Unentschieden → Elfmeterschießen
+    if (spiel.finale && partie.toreHeim === partie.toreGast) {
+      partie.elfmeter = elfmeterschiessen(werte[partie.heim], werte[partie.gast]);
+      ereignisse.push({ minute: 120, typ: "info", text: "Elfmeterschießen! " + partie.elfmeter.heim + " : " + partie.elfmeter.gast });
+    }
   }
 
-  partie.ereignisse = ereignisse;
+  partie.ereignisse = (partie.ereignisse || []).concat(ereignisse);
+  partie.haelfte = haelfte; // so viele Halbzeiten sind gerechnet
   partie.teamgeist = { [partie.heim]: werte[partie.heim].geist.gruppen.map((g) => g.text), [partie.gast]: werte[partie.gast].geist.gruppen.map((g) => g.text) };
+}
+
+// Spielerwechsel in der Halbzeit: raus geht auf die Bank, rein kommt aufs Feld
+function spielerWechseln(partie, teamIndex, rausId, reinId) {
+  partie.aufstellung[teamIndex] = partie.aufstellung[teamIndex].map((id) => (id === rausId ? reinId : id));
+  // Wird der Kapitän ausgewechselt, bekommt der Neue die Binde
+  if (partie.kapitaen[teamIndex] === rausId) partie.kapitaen[teamIndex] = reinId;
+  partie.wechsel = partie.wechsel || {};
+  partie.wechsel[teamIndex] = true;
+  partie.ereignisse.push({
+    minute: 46, typ: "wechsel", team: teamIndex,
+    text: "🔄 Wechsel bei " + spiel.teams[teamIndex].name + ": " + ALLE_SPIELER[reinId].name + " kommt für " + ALLE_SPIELER[rausId].name + ".",
+  });
+}
+
+// Wer darf in der Halbzeit eingewechselt werden? Die Bank: Handkarten, die nicht spielen und nicht verletzt sind.
+function ersatzbank(partie, teamIndex) {
+  const aufgestellt = partie.aufstellung[teamIndex] || [];
+  const schonGespielt = (partie.eingesetzt && partie.eingesetzt[teamIndex]) || [];
+  return spiel.teams[teamIndex].hand.filter((id) => !aufgestellt.includes(id) && !schonGespielt.includes(id) && !istVerletzt(id));
 }
 
 function elfmeterschiessen(heim, gast) {
@@ -650,26 +687,47 @@ function doppeltePruefen(partie) {
   return heim.filter((id) => gast.includes(id));
 }
 
-// Wenn alle aufgestellt haben: Computer stellen auf, alle Spiele werden simuliert
+// Spiele, die im Live-Ticker gezeigt werden: nur die mit Menschen.
+// (Spielen nur Computer – z. B. im Finale –, werden alle gezeigt.)
+function livePartien() {
+  const partien = spiel.runden[spiel.runde].partien;
+  const mitMenschen = partien.filter((p) => spiel.teams[p.heim].mensch || spiel.teams[p.gast].mensch);
+  return mitMenschen.length ? mitMenschen : partien;
+}
+
+// Wenn alle aufgestellt haben: Computer stellen auf, die 1. Halbzeit wird gerechnet.
+// Spiele ohne Live-Ticker werden gleich komplett gerechnet.
 function spieltagSpielen() {
   const runde = spiel.runden[spiel.runde];
   spiel.teams.forEach((team, i) => {
     if (!team.mensch && partieVon(i)) computerAufstellen(i);
   });
+  const live = livePartien();
   for (const partie of runde.partien) {
     const doppelt = doppeltePruefen(partie);
     if (doppelt.length) {
       // Sollte nie passieren – zur Sicherheit wird der Spieler beim Gast gestrichen
       partie.aufstellung[partie.gast] = partie.aufstellung[partie.gast].filter((id) => !doppelt.includes(id));
     }
-    simulieren(partie);
+    partie.ereignisse = [];
+    halbzeitSimulieren(partie, 1);
+    if (!live.includes(partie)) halbzeitSimulieren(partie, 2);
   }
-  // Müdigkeit zählen: wer gespielt hat, +1; wer pausiert hat, wieder frisch
+}
+
+// Nach dem Ticker: fehlende 2. Halbzeiten rechnen und Müdigkeit zählen (nur einmal pro Spieltag)
+function spieltagAbschliessen() {
+  const runde = spiel.runden[spiel.runde];
+  if (runde.abgeschlossen) return;
+  for (const partie of runde.partien) {
+    if (partie.haelfte < 2) halbzeitSimulieren(partie, 2);
+  }
+  // Müdigkeit: wer gespielt hat (auch eingewechselt), +1; wer pausiert hat, wieder frisch
   spiel.teams.forEach((team, i) => {
     const partie = partieVon(i);
-    const aufgestellt = partie ? partie.aufstellung[i] || [] : [];
+    const gespielt = partie && partie.eingesetzt ? partie.eingesetzt[i] || [] : [];
     for (const id of team.hand) {
-      if (aufgestellt.includes(id)) {
+      if (gespielt.includes(id)) {
         status(id).inFolge++;
         status(id).spiele++;
       } else {
@@ -677,6 +735,7 @@ function spieltagSpielen() {
       }
     }
   });
+  runde.abgeschlossen = true;
 }
 
 

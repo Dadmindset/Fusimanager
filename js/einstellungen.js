@@ -23,6 +23,7 @@ const EINSTELLUNGEN_LISTE = {
   tippWarnungAb:      { wert: 3,  min: 1, max: 10, text: "Tipp warnt nach … Spielen in Folge (k)" },
   spieltage:          { wert: 14, min: 2, max: 34, text: "Spieltage pro Saison" },
   tageZwischen:       { wert: 7,  min: 1, max: 14, text: "Tage zwischen zwei Spieltagen" },
+  computerProSpieler: { wert: 3,  min: 1, max: 5,  text: "Computer-Teams pro Spieler (l) – gilt ab dem nächsten neuen Spiel" },
   computerLevel:      { wert: 2,  min: 1, max: 3,  text: "Computer-Level (1 leicht, 2 mittel, 3 schwer)" },
   kapitaenBonus:      { wert: 10, min: 0, max: 50, text: "Kapitän-Bonus in %" },
   heimBonus:          { wert: 5,  min: 0, max: 30, text: "Heimvorteil in %" },
@@ -30,6 +31,7 @@ const EINSTELLUNGEN_LISTE = {
   feiertagMalus:      { wert: 50, min: 0, max: 100, text: "Feiertag am Spieltag: Abzug in %" },
   feiertagDanachMalus:{ wert: 20, min: 0, max: 100, text: "Tag nach dem Feiertag: Abzug in %" },
   tickerSekunden:     { wert: 20, min: 3, max: 90, text: "Dauer des Live-Tickers in Sekunden" },
+  halbzeitSekunden:   { wert: 5,  min: 0, max: 60, text: "Halbzeitpause im Live-Ticker in Sekunden (m)" },
 };
 
 // EINST enthält die aktuell gültigen Werte, z. B. EINST.startKarten

@@ -26,7 +26,9 @@ Eine neue Claude-Sitzung soll es lesen und auf dieser Basis das Spiel bauen.
 | d/e | ab Runde 4: Teamgröße | 7 |
 | f/g | ab Runde 8: Teamgröße | 11 |
 | h | Tauschen erlaubt ab so vielen Handkarten (max. 1 Tausch/Runde, Karte geht zurück in den Stapel) | 8 |
-| c | Anzahl Computer-Teams = Anzahl Teilnehmer | – |
+| c | Anzahl Computer-Teams = l × Anzahl Teilnehmer | – |
+| l | Computer-Teams pro Teilnehmer (2 Teilnehmer → 6 Computer-Gegner) | 3 |
+| m | Halbzeitpause im Live-Ticker in Sekunden | 5 |
 | i | Ermüdung ab dem i-ten Spiel in Folge (−10 % pro weiterem Spiel, Verletzungsrisiko steigt) | 4 |
 | k | Tipp warnt nach k Spielen in Folge | 3 |
 | j | Zufallsverletzung alle j Runden (fällt 1 Spiel aus) | 4 |
@@ -36,7 +38,7 @@ Eine neue Claude-Sitzung soll es lesen und auf dieser Basis das Spiel bauen.
 | – | Feiertag am Spieltag / Tag danach | −50 % / −20 % (abgemildert statt Totalausfall) |
 | – | Kapitän-Bonus | +10 % |
 | – | Computer-Level | 1–3 (einstellbar) |
-| l | Bonus-Ziehen aus Stickern, die man physisch nicht hat (Chance auf Messi/Mbappé) | **später**, nicht im MVP |
+| n | Bonus-Ziehen aus Stickern, die man physisch nicht hat (Chance auf Messi/Mbappé) | **später**, nicht im MVP |
 
 ## Spielablauf (Entscheidungen)
 
@@ -226,6 +228,14 @@ Villarreal (Partey, L. Costa) · Sunderland (Xhaka, Diarra) · Lille (Mbemba, Me
 Al Sadd (Al-Haydos, Saïss, Salman) · Augsburg (Gregoritsch, Jakić) · Burnley (Tuanzebe, Amdouni) · Fulham (Robinson, Berge) ·
 Aston Villa (E. Martínez, Digne) · AC Milan (Leão, Maignan) · Galatasaray (Çakır, Ayhan) · Al-Karma (Abu Hashish, Saadeh) ·
 Al-Ahli Saudi (Mahrez, Abu Alshamat) · Çaykur Rizespor (Fofana, Aliqulov).
+
+## Änderungen nach Version 1.0
+
+- Startseite: „Der Fußball-Manager mit euren Fusi-Karten“ (nicht mehr „Panini“).
+- Neue Variable **l**: Computer-Teams pro Teilnehmer (Standard 3). Bei ungerader Teamzahl hat pro Spieltag ein Team spielfrei.
+- Live-Ticker: Heim blau, Gast orange; „⚽ TOR für …“; Torübersicht (Minute, Torschütze, Vorlage, Verein) an der Seite.
+- Neue Variable **m**: Halbzeitpause im Ticker (Standard 5 Sekunden).
+- Live-Ticker zeigt nur Spiele mit menschlicher Beteiligung; die übrigen Ergebnisse stehen in der Auswertung.
 
 ## Offene Punkte
 

@@ -18,6 +18,7 @@ const ui = {
   spielNr: 0,         // welches Spiel im Live-Ticker gezeigt wird
   tickerIndex: 0,
   tickerUhr: null,
+  pauseRest: 0,       // Sekunden, die die Halbzeitpause noch dauert
   neuBestaetigen: false,
 };
 
@@ -143,7 +144,7 @@ SEITEN.start = function () {
   return '<section class="start">' +
     '<img src="bilder/logo.svg" alt="Fußballer beim Fallrückzieher" class="logo-gross">' +
     "<h1>Liga-Simulator</h1>" +
-    '<p class="untertitel">Der Fußball-Manager mit euren Panini-Karten der WM 2026</p>' +
+    '<p class="untertitel">Der Fußball-Manager mit euren Fusi-Karten</p>' +
     '<div class="knopfreihe">' +
     (gespeichert ? '<button class="knopf haupt" data-aktion="fortsetzen">▶️ Spiel fortsetzen</button>' : "") +
     '<button class="knopf' + (gespeichert ? "" : " haupt") + '" data-aktion="neuesSpiel">⚽ Neues Spiel</button>' +
@@ -165,7 +166,7 @@ SEITEN.einrichten = function () {
     ["", "😊 Leicht", "😐 Mittel", "😈 Schwer"][l] + "</button>").join("");
   return '<section class="seite">' +
     "<h2>Wer spielt mit?</h2>" +
-    '<p class="leise">Tragt eure Namen ein. Für jeden Menschen spielt auch ein Computer-Team mit.</p>' +
+    '<p class="leise">Tragt eure Namen ein. Für jeden Menschen spielen ' + EINST.computerProSpieler + " Computer-Teams mit (einstellbar unter ⚙️).</p>" +
     '<div class="namen">' + felder + "</div>" +
     "<h3>Wie stark ist der Computer?</h3>" +
     '<div class="knopfreihe">' + level + "</div>" +
@@ -207,6 +208,11 @@ SEITEN.vorschau = function () {
       '<div class="paarung"><span>' + teamName(p.heim) + '</span><span class="vs">gegen</span><span>' + teamName(p.gast) + "</span></div>" +
       '<div class="ort">📍 ' + flagge(p.ort) + " " + p.stadt + " · 🌡️ " + p.temp + " °C · " + p.wetter + "</div>" +
       "</div>";
+  }
+  // Wer hat an diesem Spieltag frei? (nur bei ungerader Anzahl Teams, nicht im Finale)
+  if (!spiel.finale) {
+    const frei = spiel.teams.map((t, i) => i).filter((i) => !partieVon(i));
+    if (frei.length) html += '<p class="leise">😴 Spielfrei: ' + frei.map(teamName).join(", ") + "</p>";
   }
   // Feiertage aller Länder, deren Spieler gerade auf einer Hand sind
   const laender = [...new Set(spiel.teams.flatMap((t) => t.hand.map((id) => ALLE_SPIELER[id].land)))];
@@ -255,7 +261,9 @@ SEITEN.ziehen = function () {
         " Karten und darfst einen Spieler abgeben und dafür einen neuen ziehen. Tippe auf die Karte, die du abgeben willst:</p>" +
         '<div class="karten">' + team.hand.map((id) => karteHtml(id, { aktion: "tauschWaehlen", klein: true })).join("") + "</div></div>";
     }
-    html += '<div class="knopfreihe"><button class="knopf haupt" data-aktion="zurAufstellung">Weiter zur Aufstellung ▶</button></div>';
+    const spielfrei = !partieVon(spiel.aktuell);
+    html += (spielfrei ? "<p>😴 Du hast diesen Spieltag spielfrei – keine Aufstellung nötig.</p>" : "") +
+      '<div class="knopfreihe"><button class="knopf haupt" data-aktion="zurAufstellung">' + (spielfrei ? "Weiter ▶" : "Weiter zur Aufstellung ▶") + "</button></div>";
   }
   return html + "</section>";
 };
@@ -318,63 +326,104 @@ SEITEN.bestaetigen = function () {
     '<button class="knopf haupt" data-aktion="soSpielen">✅ So spielen</button></div></section>';
 };
 
-// Live-Ticker: zeigt ein Spiel nach dem anderen
-function partienReihenfolge() {
-  // Spiele mit Menschen zuerst
+// Live-Ticker: zeigt nur die Spiele, in denen ein Mensch mitspielt.
+// Die Spiele der Computer untereinander stehen danach in der Auswertung.
+function tickerPartien() {
   const partien = spiel.runden[spiel.runde].partien;
-  return [...partien].sort((a, b) => {
-    const mensch = (p) => (spiel.teams[p.heim].mensch || spiel.teams[p.gast].mensch ? 0 : 1);
-    return mensch(a) - mensch(b);
-  });
+  const mitMenschen = partien.filter((p) => spiel.teams[p.heim].mensch || spiel.teams[p.gast].mensch);
+  return mitMenschen.length ? mitMenschen : partien;
+}
+
+// "heim" oder "gast" – bestimmt die Farbe (Heim blau, Gast orange)
+function seiteVon(partie, teamIndex) {
+  return teamIndex === partie.heim ? "heim" : "gast";
 }
 
 function aufstellungListe(partie, t) {
   const ids = partie.aufstellung[t] || [];
-  return '<ul class="liste-aufstellung">' + ids.map((id) => {
-    const sp = ALLE_SPIELER[id];
-    return "<li><span class=\"pos-mini pos-" + sp.pos + "\">" + sp.pos + "</span> " + flagge(sp.land) + " " + sicher(sp.name) +
-      (partie.kapitaen[t] === id ? " ©" : "") + "</li>";
-  }).join("") + "</ul>" +
-    (partie.teamgeist && partie.teamgeist[t].length ? '<p class="teamgeist klein">' + partie.teamgeist[t].join(" · ") + "</p>" : "");
+  return '<div class="aufstellung-team ' + seiteVon(partie, t) + '"><h3>' + teamName(t) + "</h3>" +
+    '<ul class="liste-aufstellung">' + ids.map((id) => {
+      const sp = ALLE_SPIELER[id];
+      return "<li><span class=\"pos-mini pos-" + sp.pos + "\">" + sp.pos + "</span> " + flagge(sp.land) + " " + sicher(sp.name) +
+        (partie.kapitaen[t] === id ? " ©" : "") + "</li>";
+    }).join("") + "</ul>" +
+    (partie.teamgeist && partie.teamgeist[t].length ? '<p class="teamgeist klein">' + partie.teamgeist[t].join(" · ") + "</p>" : "") +
+    "</div>";
 }
 
 function bildFuerTor(art) {
   return "bilder/tor-" + (art === "fernschuss" ? "schuss" : art) + ".svg";
 }
 
+// Mini-Tabelle mit allen bisherigen Toren: Minute, Torschütze, Vorlage, Verein
+function torUebersicht(partie, sichtbar) {
+  const tore = sichtbar.filter((e) => e.typ === "tor");
+  let html = '<aside class="tor-uebersicht"><h3>⚽ Tore</h3>';
+  if (!tore.length) return html + '<p class="leise">Noch keine Tore.</p></aside>';
+  html += '<div class="tabelle-rahmen"><table class="tabelle klein"><thead><tr><th>Min</th><th>Torschütze</th><th>Vorlage</th><th>Verein</th></tr></thead><tbody>';
+  for (const e of tore) {
+    const schuetze = ALLE_SPIELER[e.spieler];
+    const verein = vereinKurz(schuetze.verein);
+    html += '<tr class="' + seiteVon(partie, e.team) + '"><td>' + e.minute + "'</td>" +
+      '<td class="team-spalte"><b>' + sicher(schuetze.name) + "</b>" + (verein && verein !== "?" ? "<br><small>" + sicher(verein) + "</small>" : "") + "</td>" +
+      '<td class="team-spalte">' + (e.vorlage ? sicher(ALLE_SPIELER[e.vorlage].name) : "–") + "</td>" +
+      '<td class="team-spalte"><span class="team-punkt"></span>' + teamName(e.team) + "</td></tr>";
+  }
+  return html + "</tbody></table></div></aside>";
+}
+
 SEITEN.spiele = function () {
-  const liste = partienReihenfolge();
+  const liste = tickerPartien();
   const partie = liste[ui.spielNr];
   const sichtbar = partie.ereignisse.slice(0, ui.tickerIndex);
   const fertig = ui.tickerIndex >= partie.ereignisse.length;
   const toreH = sichtbar.filter((e) => e.typ === "tor" && e.team === partie.heim).length;
   const toreG = sichtbar.filter((e) => e.typ === "tor" && e.team === partie.gast).length;
-  const minute = sichtbar.length ? sichtbar[sichtbar.length - 1].minute : 0;
+  const letztes = sichtbar[sichtbar.length - 1];
+  const minute = letztes ? letztes.minute : 0;
+  // Hat gerade jemand getroffen? Dann leuchtet seine Seite der Anzeigetafel auf.
+  const jubel = letztes && letztes.typ === "tor" && !fertig ? seiteVon(partie, letztes.team) : "";
 
   const ticker = [...sichtbar].reverse().map((e) => {
+    let kopf = "";
     let bilder = "";
     if (e.typ === "tor") {
+      kopf = '<strong class="tor-team">⚽ TOR für ' + teamName(e.team) + "!</strong>";
       bilder = '<div class="tor-bilder"><img src="' + bildFuerTor(e.art) + '" alt="Tor">' +
         (e.vorlage ? '<img src="bilder/vorlage.svg" alt="Vorlage">' : "") + "</div>";
     }
-    return '<li class="ereignis ' + e.typ + '"><span class="minute">' + (e.minute ? e.minute + "'" : "") + "</span><div>" + sicher(e.text) + bilder + "</div></li>";
+    const seite = e.team !== undefined ? " von-" + seiteVon(partie, e.team) : "";
+    return '<li class="ereignis ' + e.typ + seite + '"><span class="minute">' + (e.minute ? e.minute + "'" : "") + "</span><div>" +
+      kopf + sicher(e.text) + bilder + "</div></li>";
   }).join("");
+
+  let anzeige;
+  if (fertig) anzeige = partie.elfmeter ? "n. E. " + partie.elfmeter.heim + ":" + partie.elfmeter.gast : "Abpfiff";
+  else if (ui.pauseRest > 0) anzeige = "⏸️ Halbzeitpause – weiter in " + ui.pauseRest + " Sek.";
+  else anzeige = minute + ". Minute";
 
   const naechster = ui.spielNr + 1 < liste.length
     ? '<button class="knopf haupt" data-aktion="naechstesSpiel">Nächstes Spiel ▶</button>'
     : '<button class="knopf haupt" data-aktion="zurAuswertung">Zur Auswertung ▶</button>';
+  const andere = spiel.runden[spiel.runde].partien.length - liste.length;
 
   return '<section class="seite">' +
     '<p class="leise mitte">Spiel ' + (ui.spielNr + 1) + " von " + liste.length + " · 📍 " + flagge(partie.ort) + " " + partie.stadt + " · " + partie.temp + " °C " + partie.wetter + "</p>" +
     '<div class="anzeigetafel">' +
-    '<span class="tafel-team">' + teamName(partie.heim) + "</span>" +
-    '<span class="tafel-stand">' + toreH + " : " + toreG + "</span>" +
-    '<span class="tafel-team">' + teamName(partie.gast) + "</span>" +
-    '<span class="tafel-minute">' + (fertig ? (partie.elfmeter ? "n. E. " + partie.elfmeter.heim + ":" + partie.elfmeter.gast : "Abpfiff") : minute + ". Minute") + "</span>" +
+    '<span class="tafel-team heim' + (jubel === "heim" ? " jubel" : "") + '"><small>HEIM</small>' + teamName(partie.heim) + "</span>" +
+    '<span class="tafel-stand"><span class="heim-zahl">' + toreH + '</span> : <span class="gast-zahl">' + toreG + "</span></span>" +
+    '<span class="tafel-team gast' + (jubel === "gast" ? " jubel" : "") + '"><small>GAST</small>' + teamName(partie.gast) + "</span>" +
+    '<span class="tafel-minute">' + anzeige + "</span>" +
     "</div>" +
-    '<div class="aufstellungen"><div>' + aufstellungListe(partie, partie.heim) + "</div><div>" + aufstellungListe(partie, partie.gast) + "</div></div>" +
+    '<div class="spiel-layout">' +
+    '<div class="spiel-haupt">' +
+    '<div class="aufstellungen">' + aufstellungListe(partie, partie.heim) + aufstellungListe(partie, partie.gast) + "</div>" +
     '<ul class="ticker">' + ticker + "</ul>" +
+    "</div>" +
+    torUebersicht(partie, sichtbar) +
+    "</div>" +
     '<div class="knopfreihe">' + (fertig ? naechster : '<button class="knopf" data-aktion="ueberspringen">⏩ Überspringen</button>') + "</div>" +
+    (fertig && andere > 0 && ui.spielNr + 1 >= liste.length ? '<p class="leise">Die anderen ' + andere + " Spiele dieses Spieltags seht ihr in der Auswertung.</p>" : "") +
     "</section>";
 };
 
@@ -398,7 +447,10 @@ SEITEN.auswertung = function () {
   spiel.teams.forEach((team, i) => {
     if (!team.mensch) return;
     const p = partieVon(i);
-    if (!p) return;
+    if (!p) {
+      if (!spiel.finale) html += '<div class="kasten persoenlich remis"><h3>' + sicher(team.name) + "</h3><p>😴 Du hattest diesen Spieltag spielfrei.</p></div>";
+      return;
+    }
     const eigene = p.heim === i ? p.toreHeim : p.toreGast;
     const fremde = p.heim === i ? p.toreGast : p.toreHeim;
     const sieger = siegerVon(p);
@@ -520,16 +572,33 @@ function naechsterMensch() {
 }
 
 function tickerStarten() {
-  clearInterval(ui.tickerUhr);
+  clearTimeout(ui.tickerUhr);
   ui.tickerIndex = 0;
+  ui.pauseRest = 0;
   gehe("spiele");
-  const partie = partienReihenfolge()[ui.spielNr];
-  const pause = (EINST.tickerSekunden * 1000) / Math.max(1, partie.ereignisse.length);
-  ui.tickerUhr = setInterval(() => {
+  ui.tickerUhr = setTimeout(tickerSchritt, tickerPause());
+}
+
+// Wie lange zwischen zwei Ticker-Meldungen gewartet wird
+function tickerPause() {
+  const partie = tickerPartien()[ui.spielNr];
+  return (EINST.tickerSekunden * 1000) / Math.max(1, partie.ereignisse.length);
+}
+
+// Zeigt die nächste Meldung. Nach der Halbzeit-Meldung wird m Sekunden pausiert.
+function tickerSchritt() {
+  const partie = tickerPartien()[ui.spielNr];
+  if (ui.pauseRest > 0) {
+    ui.pauseRest--;
+  } else {
     ui.tickerIndex++;
-    if (ui.tickerIndex >= partie.ereignisse.length) clearInterval(ui.tickerUhr);
-    if (ui.seite === "spiele") zeige();
-  }, pause);
+    const letztes = partie.ereignisse[ui.tickerIndex - 1];
+    if (letztes && letztes.typ === "halbzeit") ui.pauseRest = EINST.halbzeitSekunden;
+  }
+  if (ui.seite === "spiele") zeige();
+  if (ui.tickerIndex < partie.ereignisse.length) {
+    ui.tickerUhr = setTimeout(tickerSchritt, ui.pauseRest > 0 ? 1000 : tickerPause());
+  }
 }
 
 function aufstellungBeginnen() {
@@ -540,7 +609,8 @@ function aufstellungBeginnen() {
   const team = spiel.teams[spiel.aktuell];
   const ziehenMoeglich = !spiel.finale && spiel.runde > 1;
   if (ziehenMoeglich && (team.hand.length < EINST.maxHand || team.hand.length >= EINST.tauschAb)) gehe("ziehen");
-  else gehe("aufstellen");
+  else if (partieVon(spiel.aktuell)) gehe("aufstellen");
+  else naechsterMensch(); // spielfrei und nichts zu ziehen
 }
 
 // Eine Karte zur Hand des aktuellen Menschen hinzufügen
@@ -557,7 +627,7 @@ function karteAufnehmen(id) {
 // AKTIONEN – was bei einem Klick passiert
 // ---------------------------------------------------------------------
 const AKTIONEN = {
-  zumStart() { clearInterval(ui.tickerUhr); ui.neuBestaetigen = false; gehe("start"); },
+  zumStart() { clearTimeout(ui.tickerUhr); ui.neuBestaetigen = false; gehe("start"); },
   fortsetzen() {
     ui.auswahl = []; ui.kapitaen = null;
     if (spiel.phase === "spiele") { ui.spielNr = 0; tickerStarten(); return; }
@@ -635,7 +705,10 @@ const AKTIONEN = {
   nichtZiehen() { spiel.teams[spiel.aktuell].gezogen = true; ui.meldung = ""; zeige(); },
   tauschWaehlen(id) { ui.tauschKarte = id; ui.meldung = ""; zeige(); },
   tauschAbbrechen() { ui.tauschKarte = null; ui.meldung = ""; zeige(); },
-  zurAufstellung() { gehe("aufstellen"); },
+  zurAufstellung() {
+    if (partieVon(spiel.aktuell)) gehe("aufstellen");
+    else naechsterMensch(); // spielfrei: kein Aufstellen nötig
+  },
   waehlen(id) {
     if (istVerletzt(id)) { ui.meldung = "🤕 " + sicher(ALLE_SPIELER[id].name) + " ist verletzt und kann heute nicht spielen."; zeige(); return; }
     const n = Math.min(teamGroesse(spiel.runde), verfuegbareSpieler(spiel.aktuell).length);
@@ -665,8 +738,9 @@ const AKTIONEN = {
     naechsterMensch();
   },
   ueberspringen() {
-    clearInterval(ui.tickerUhr);
-    ui.tickerIndex = partienReihenfolge()[ui.spielNr].ereignisse.length;
+    clearTimeout(ui.tickerUhr);
+    ui.pauseRest = 0;
+    ui.tickerIndex = tickerPartien()[ui.spielNr].ereignisse.length;
     zeige();
   },
   naechstesSpiel() { ui.spielNr++; tickerStarten(); },
@@ -686,7 +760,7 @@ const AKTIONEN = {
     gehe("pokal");
   },
   einstellungen() {
-    clearInterval(ui.tickerUhr);
+    clearTimeout(ui.tickerUhr);
     if (ui.seite !== "einstellungen") seiteVorEinstellungen = ui.seite;
     gehe("einstellungen");
   },

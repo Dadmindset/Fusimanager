@@ -24,6 +24,12 @@
   --pos-mf: #ea7424;
   --pos-st: #1f4e79;
 
+  /* Heim- und Gastmannschaft im Live-Ticker */
+  --heim: #1d5fd1;
+  --heim-hell: #e3ecfb;
+  --gast: #e0661b;
+  --gast-hell: #fdebdf;
+
   --schrift-gross: "Anton", "Impact", "Arial Narrow", sans-serif;
   --schrift: "Nunito", "Trebuchet MS", system-ui, sans-serif;
 
@@ -43,6 +49,10 @@
     --flaeche: #15261f;
     --leise: #9db3a8;
     --linie: #2a4237;
+    --heim: #5b9bff;
+    --heim-hell: #17284a;
+    --gast: #ff9a52;
+    --gast-hell: #3d2414;
     color-scheme: dark;
   }
 }
@@ -57,6 +67,10 @@
   --flaeche: #15261f;
   --leise: #9db3a8;
   --linie: #2a4237;
+  --heim: #5b9bff;
+  --heim-hell: #17284a;
+  --gast: #ff9a52;
+  --gast-hell: #3d2414;
   color-scheme: dark;
 }
 
@@ -284,12 +298,47 @@ div.karte { cursor: default; }
   color: #fff;
   text-align: center;
 }
-.tafel-team { font-weight: 900; font-size: clamp(0.95rem, 3vw, 1.3rem); min-width: 0; overflow-wrap: anywhere; }
-.tafel-stand { font-family: var(--schrift-gross); font-size: clamp(2.6rem, 10vw, 4rem); color: var(--flutlicht); font-variant-numeric: tabular-nums; }
+.tafel-team {
+  display: flex; flex-direction: column; gap: 2px;
+  font-weight: 900; font-size: clamp(0.95rem, 3vw, 1.3rem); min-width: 0; overflow-wrap: anywhere;
+  padding: 8px 6px; border-radius: 8px; border-bottom: 5px solid transparent;
+}
+.tafel-team small { font-size: 0.7rem; letter-spacing: 0.12em; opacity: 0.8; }
+.tafel-team.heim { border-color: var(--heim); }
+.tafel-team.gast { border-color: var(--gast); }
+.tafel-team.heim.jubel { background: var(--heim); animation: jubel 0.5s ease 3; }
+.tafel-team.gast.jubel { background: var(--gast); animation: jubel 0.5s ease 3; }
+.heim-zahl { color: var(--heim); }
+.gast-zahl { color: var(--gast); }
+@keyframes jubel { 50% { transform: scale(1.08); } }
+.tafel-stand { font-family: var(--schrift-gross); font-size: clamp(2.6rem, 10vw, 4rem); color: #ffffff; font-variant-numeric: tabular-nums; }
+.tafel-stand .heim-zahl { color: #8fb8ff; }
+.tafel-stand .gast-zahl { color: #ffb27a; }
 .tafel-minute { grid-column: 1 / -1; color: #9fd8b5; font-weight: 800; }
 
 .aufstellungen { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .aufstellungen > div { min-width: 0; }
+.aufstellung-team { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border-radius: var(--rund); border-top: 5px solid; }
+.aufstellung-team h3 { font-size: 1.05rem; }
+.aufstellung-team.heim { border-color: var(--heim); background: var(--heim-hell); }
+.aufstellung-team.gast { border-color: var(--gast); background: var(--gast-hell); }
+
+/* Ticker links, Torübersicht rechts (auf dem Handy untereinander, Tore zuerst) */
+.spiel-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 340px); gap: 16px; align-items: start; }
+.spiel-haupt { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.tor-uebersicht {
+  position: sticky; top: calc(env(safe-area-inset-top, 0px) + 64px);
+  display: flex; flex-direction: column; gap: 8px; min-width: 0;
+  background: var(--flaeche); border: 1px solid var(--linie); border-radius: var(--rund); padding: 12px;
+}
+.tabelle.klein { font-size: 0.85rem; }
+.tabelle.klein th, .tabelle.klein td { padding: 5px 6px; vertical-align: top; }
+.tabelle.klein small { color: var(--leise); }
+.tabelle tr.heim td:first-child { border-left: 5px solid var(--heim); }
+.tabelle tr.gast td:first-child { border-left: 5px solid var(--gast); }
+.team-punkt { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; }
+tr.heim .team-punkt { background: var(--heim); }
+tr.gast .team-punkt { background: var(--gast); }
 .liste-aufstellung { list-style: none; margin: 0; padding: 0; font-size: 0.85rem; display: flex; flex-direction: column; gap: 3px; }
 .pos-mini { display: inline-block; min-width: 2.2em; text-align: center; color: #fff; border-radius: 4px; font-size: 0.7rem; font-weight: 900; }
 
@@ -300,8 +349,14 @@ div.karte { cursor: default; }
   background: var(--flaeche); border: 1px solid var(--linie);
 }
 .ereignis .minute { font-weight: 900; color: var(--leise); font-variant-numeric: tabular-nums; }
-.ereignis.tor { background: var(--flutlicht); color: #14213d; border-color: var(--flutlicht); font-weight: 800; font-size: 1.05rem; animation: tor 0.6s ease; }
-.ereignis.tor .minute { color: #14213d; }
+.ereignis.von-heim { border-left: 6px solid var(--heim); }
+.ereignis.von-gast { border-left: 6px solid var(--gast); }
+.ereignis.tor { color: #ffffff; font-weight: 800; font-size: 1.05rem; animation: tor 0.6s ease; }
+.ereignis.tor.von-heim { background: var(--heim); border-color: var(--heim); }
+.ereignis.tor.von-gast { background: var(--gast); border-color: var(--gast); }
+.ereignis.tor .minute { color: #ffffff; }
+.tor-team { display: block; font-family: var(--schrift-gross); font-weight: 400; font-size: 1.4rem; letter-spacing: 0.03em; }
+.ereignis.halbzeit { background: var(--rasen-hell); font-weight: 800; }
 .ereignis.verletzung { border-color: var(--rot); }
 .ereignis.gelb { border-left: 6px solid #ffc400; }
 .tor-bilder { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
@@ -348,6 +403,11 @@ div.karte { cursor: default; }
 /* ---------- Einstellungen ---------- */
 .einstellungen { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
 .einstellung { display: flex; flex-direction: column; gap: 4px; font-weight: 700; font-size: 0.92rem; }
+
+@media (max-width: 760px) {
+  .spiel-layout { grid-template-columns: 1fr; }
+  .tor-uebersicht { position: static; order: -1; }
+}
 
 @media (max-width: 480px) {
   .karten { grid-template-columns: repeat(2, minmax(0, 1fr)); }

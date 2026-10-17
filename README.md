@@ -1,6 +1,6 @@
 # ⚽ Liga-Simulator
 
-Ein Fußball-Manager für die Familie – gespielt mit euren echten Panini-Karten der WM 2026.
+Ein Fußball-Manager für die Familie – gespielt mit euren echten Fusi-Karten (Panini-Sticker der WM 2026).
 Ihr zieht Karten vom Stapel, tippt sie ins Spiel ein, stellt eure Mannschaft auf und
 der Computer spielt eine ganze Liga-Saison mit Live-Ticker, Tabelle, Torschützenliste und Finale.
 
@@ -21,7 +21,8 @@ Der Spielstand wird im Browser gespeichert. Ihr könnt jederzeit aufhören und s
    Ab 8 Karten darf man einmal pro Runde einen Spieler tauschen.
 4. **Aufstellen** – Karten antippen, Kapitän wählen, „Fertig“ → „So spielen“ oder „Ändern“.
    Der Knopf 💡 gibt Tipps, 🪄 macht einen Vorschlag.
-5. **Live-Ticker** – die Spiele laufen ab, mit Toren, Vorlagen und Bildern.
+5. **Live-Ticker** – eure Spiele laufen ab: Heim blau, Gast orange, mit Torübersicht an der Seite
+   und einer Halbzeitpause. Die Spiele der Computer untereinander stehen in der Auswertung.
 6. **Auswertung** – Ergebnisse, Tabelle mit Auf- und Abstieg, Scorerliste.
 
 Nach dem letzten Spieltag spielen Platz 1 und Platz 2 das **Finale**, danach gibt es die **Pokalübergabe**.
@@ -30,6 +31,7 @@ Nach dem letzten Spieltag spielen Platz 1 und Platz 2 das **Finale**, danach gib
 
 | Was | Wirkung |
 |---|---|
+| Gegner | Pro Spieler spielen 3 Computer-Teams mit (Einstellung „l“). Bei ungerader Teamzahl hat pro Spieltag ein Team frei. |
 | Positionen | Ohne Stürmer keine Tore, ohne Abwehr viele Gegentore. Ohne Torwart muss der beste Verteidiger ins Tor (schwach!). |
 | Stärke | Jeder Spieler hat eine Stärke (als ★ angezeigt). |
 | Teamgeist | Spieler aus dem gleichen Land oder Verein (laut Sticker) spielen besser zusammen. |

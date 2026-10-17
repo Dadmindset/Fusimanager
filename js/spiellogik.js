@@ -23,7 +23,11 @@ for (const karte of COMPUTER_POOL) {
 }
 
 // Namen für die Computer-Mannschaften
-const COMPUTER_NAMEN = ["Robo-Kicker", "Bit-Borussia", "FC Pixel", "Kicker-KI", "Turbo-Tablet 09", "Byte München"];
+const COMPUTER_NAMEN = [
+  "Robo-Kicker", "Bit-Borussia", "FC Pixel", "Kicker-KI", "Turbo-Tablet 09", "Byte München",
+  "Real Roboter", "Akku Aachen", "Chip Chelsea", "Joystick Juventus", "Laptop Lissabon", "Code Dortmund",
+  "Sporting Server", "Atlético Algorithmus", "Inter Internet", "Bluetooth Bayern",
+];
 
 // Wie stark zählt eine Position für Angriff und Abwehr?
 const GEWICHT_ANGRIFF = { TW: 0.05, AB: 0.25, MF: 0.6, ST: 1.0 };
@@ -260,22 +264,30 @@ function neuesSpiel(menschenNamen) {
   for (const name of menschenNamen) {
     spiel.teams.push({ name, mensch: true, hand: [], heimat: null });
   }
+  // Pro Mensch spielen l Computer-Teams mit (Einstellung computerProSpieler)
+  const anzahlComputer = menschenNamen.length * EINST.computerProSpieler;
   const computerNamen = mischen(COMPUTER_NAMEN);
-  for (let i = 0; i < menschenNamen.length; i++) {
-    spiel.teams.push({ name: computerNamen[i], mensch: false, hand: [], heimat: null });
+  for (let i = 0; i < anzahlComputer; i++) {
+    // Reichen die Namen nicht, bekommen sie eine Nummer: "Robo-Kicker 2"
+    const name = computerNamen[i % computerNamen.length] + (i >= computerNamen.length ? " " + (Math.floor(i / computerNamen.length) + 1) : "");
+    spiel.teams.push({ name, mensch: false, hand: [], heimat: null });
   }
 }
 
 // Jeder spielt gegen jeden ("Rundenturnier"), so oft bis alle Spieltage voll sind.
+// Bei einer ungeraden Anzahl Teams kommt ein "Spielfrei"-Platz (-1) dazu:
+// Wer gegen -1 gelost wird, hat an diesem Spieltag frei.
 function spielplanErstellen() {
-  const anzahl = spiel.teams.length;
-  const ids = mischen([...Array(anzahl).keys()]);
+  const ids = mischen([...Array(spiel.teams.length).keys()]);
+  if (ids.length % 2 === 1) ids.push(-1);
+  const anzahl = ids.length;
   const grundRunden = [];
   for (let r = 0; r < anzahl - 1; r++) {
     const paare = [];
     for (let i = 0; i < anzahl / 2; i++) {
       const a = ids[i];
       const b = ids[anzahl - 1 - i];
+      if (a === -1 || b === -1) continue; // spielfrei
       paare.push(r % 2 === 0 ? [a, b] : [b, a]);
     }
     grundRunden.push(paare);
@@ -326,10 +338,11 @@ function partieVon(teamIndex) {
   return runde.partien.find((p) => p.heim === teamIndex || p.gast === teamIndex) || null;
 }
 
-// Welche Menschen spielen in dieser Runde? (Im Finale nicht alle!)
+// Welche Menschen sind in dieser Runde dran? Im Finale nur die Finalisten.
+// Sonst alle – auch wer spielfrei hat, zieht eine Karte.
 function menschenDieserRunde() {
   const liste = [];
-  spiel.teams.forEach((team, i) => { if (team.mensch && partieVon(i)) liste.push(i); });
+  spiel.teams.forEach((team, i) => { if (team.mensch && (partieVon(i) || !spiel.finale)) liste.push(i); });
   return liste;
 }
 
@@ -601,7 +614,7 @@ function simulieren(partie) {
     ereignisse.push({ minute: 1 + Math.floor(Math.random() * 90), typ: "verletzung", team: t, spieler: id, text: textBauen(TEXTE.verletzung, { spieler: name(id) }) });
   }
 
-  ereignisse.push({ minute: 45, typ: "info", text: textBauen(TEXTE.halbzeit, {}) });
+  ereignisse.push({ minute: 45, typ: "halbzeit", text: textBauen(TEXTE.halbzeit, {}) });
   ereignisse.sort((a, b) => a.minute - b.minute);
   ereignisse.push({ minute: 90, typ: "info", text: textBauen(TEXTE.abpfiff, {}) });
 

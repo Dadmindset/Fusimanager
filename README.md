@@ -10,6 +10,12 @@ der Computer spielt eine ganze Liga-Saison mit Live-Ticker, Tabelle, Torschütze
 
 **Auf dem Handy / Tablet:** über den Link, den Claude veröffentlicht hat (siehe unten „Online stellen“).
 
+**Offline auf dem Android-Handy:**
+1. Die öffentliche Seite einmal **mit Internet** in Chrome öffnen.
+2. Chrome-Menü **⋮** → **„App installieren“** (oder „Zum Startbildschirm hinzufügen“).
+3. Ab jetzt über das Fallrückzieher-Symbol starten – das Spiel läuft dann auch ohne Internet.
+   Ist das Handy online, holt es sich beim Start automatisch die neueste Version.
+
 Der Spielstand wird im Browser gespeichert. Ihr könnt jederzeit aufhören und später auf
 „Spiel fortsetzen“ tippen (auf demselben Gerät, im selben Browser).
 
@@ -51,6 +57,8 @@ Alle Zahlen könnt ihr im Spiel unter ⚙️ **Einstellungen** ändern.
 
 ```
 index.html            Die Seite selbst. Lädt alle anderen Dateien.
+manifest.json         Name und Symbol für den Handy-Startbildschirm.
+sw.js                 "Service Worker": speichert alle Dateien fürs Offline-Spielen.
 style.css             Das Aussehen: Farben, Schriften, Karten-Design.
 daten/
   spielset.js         EURE Karten (122 Spieler). Hier tragt ihr neue Karten ein!
